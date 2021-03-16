@@ -1,6 +1,6 @@
 # pglogical-poc
 
-> PostgreSQL 11.5 with pglogical 2.2.2
+> Replicate from PostgreSQL 11.5 to 11.10 using pglogical 2.2.2
 
 ## Documentation
 
