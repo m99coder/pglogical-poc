@@ -6,7 +6,6 @@ services:
       - POSTGRES_PASSWORD=s3cr3t
     volumes:
       - ./provider/postgresql.conf:/usr/share/postgresql/11/postgresql.conf.sample
-      # - ./provider/pg_hba.conf:/usr/share/postgresql/11/pg_hba.conf.sample
   pgsubscriber:
     build: ./subscriber
     depends_on:
@@ -15,4 +14,3 @@ services:
       - POSTGRES_PASSWORD=s3cr3t
     volumes:
       - ./subscriber/postgresql.conf:/usr/share/postgresql/11/postgresql.conf.sample
-      # - ./subscriber/pg_hba.conf:/usr/share/postgresql/11/pg_hba.conf.sample
