@@ -1,26 +1,18 @@
 version: "3"
 services:
-  provider:
+  pgprovider:
     build: ./provider
     environment:
       - POSTGRES_PASSWORD=s3cr3t
-      - POSTGRES_DB=logging
-    ports:
-      - "127.0.0.1:5432:5432"
-    restart: always
     volumes:
-      - ./provider/data:/var/lib/postgresql/data
       - ./provider/postgresql.conf:/usr/share/postgresql/11/postgresql.conf.sample
-      - ./provider/pg_hba.conf:/usr/share/postgresql/11/pg_hba.conf.sample
-  subscriber:
+      # - ./provider/pg_hba.conf:/usr/share/postgresql/11/pg_hba.conf.sample
+  pgsubscriber:
     build: ./subscriber
+    depends_on:
+      - "pgprovider"
     environment:
       - POSTGRES_PASSWORD=s3cr3t
-      - POSTGRES_DB=logging
-    ports:
-      - "127.0.0.1:5999:5432"
-    restart: always
     volumes:
-      - ./subscriber/data:/var/lib/postgresql/data
       - ./subscriber/postgresql.conf:/usr/share/postgresql/11/postgresql.conf.sample
-      - ./subscriber/pg_hba.conf:/usr/share/postgresql/11/pg_hba.conf.sample
+      # - ./subscriber/pg_hba.conf:/usr/share/postgresql/11/pg_hba.conf.sample
