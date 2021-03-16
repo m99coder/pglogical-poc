@@ -367,6 +367,7 @@ docker network rm pg-network
 
 ## Resources
 
+- [PostgreSQL and the logical replication](https://blog.raveland.org/post/postgresql_lr_en/)
 - [PostgreSQL replication with Docker](https://medium.com/swlh/postgresql-replication-with-docker-c6a904becf77)
 - [Dockerfile](https://gist.github.com/asaaki/b07dccfd6ff6eed4c7b4ef279ade7b0c)
 - [docker-pglogical](https://github.com/reediculous456/docker-pglogical/blob/master/Dockerfile)
