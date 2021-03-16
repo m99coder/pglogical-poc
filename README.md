@@ -121,6 +121,117 @@ docker-compose ps
 docker-compose down --rmi all
 ```
 
+## Manual
+
+```bash
+# setup
+docker network create pg-network
+docker container run -d \
+  --name pgprovider --network pg-network \
+  -e POSTGRES_PASSWORD=password \
+  postgres:11.5-alpine
+docker container run -d \
+  --name pgsubscriber --network pg-network \
+  -e POSTGRES_PASSWORD=password \
+  postgres:11.10-alpine
+```
+
+```bash
+# configure WAL level
+docker container exec -it pgprovider /bin/sh
+/ # psql -U postgres
+psql (11.5)
+Type "help" for help.
+
+postgres=# ALTER SYSTEM SET wal_level = 'logical';
+ALTER SYSTEM
+postgres=# exit
+/ # exit
+docker container restart pgprovider
+```
+
+```bash
+# create a database and a table with dummy data
+# create a role, a publication and grant access for role
+docker container exec -it pgprovider /bin/sh
+/ # psql -U postgres
+psql (11.5)
+Type "help" for help.
+
+postgres=# CREATE DATABASE replication;
+CREATE DATABASE
+postgres=# \c replication
+You are now connected to database "replication" as user "postgres".
+replication=# CREATE TABLE hashes (id SERIAL, value CHAR(33), PRIMARY KEY(value));
+CREATE TABLE
+replication=# INSERT INTO hashes (SELECT generate_series(1, 1000), md5(random()::text));
+INSERT 0 1000
+replication=# CREATE ROLE replicate WITH LOGIN PASSWORD 'qwertz' REPLICATION;
+CREATE ROLE
+replication=# CREATE PUBLICATION pubhashes FOR TABLE hashes;
+CREATE PUBLICATION
+replication=# GRANT SELECT ON hashes TO replicate;
+GRANT
+replication=# exit
+/ # exit
+```
+
+```bash
+# create a database and a table
+# create a subscription
+docker container exec -it pgsubscriber /bin/sh
+/ # psql -U postgres
+psql (11.10)
+Type "help" for help.
+
+postgres=# CREATE DATABASE replication_repl;
+CREATE DATABASE
+postgres=# \c replication_repl
+You are now connected to database "replication_repl" as user "postgres".
+replication_repl=# CREATE TABLE hashes (id SERIAL, value CHAR(33), PRIMARY KEY(value));
+CREATE TABLE
+replication_repl=# CREATE SUBSCRIPTION subhashes CONNECTION 'host=pgprovider dbname=replication user=replicate password=qwertz' PUBLICATION
+pubhashes;
+NOTICE:  created replication slot "subhashes" on publisher
+CREATE SUBSCRIPTION
+replication_repl=# exit
+/ # exit
+```
+
+```bash
+# view logs
+docker container logs pgsubscriber
+2021-03-16 11:26:32.363 UTC [75] LOG:  logical replication apply worker for subscription "subhashes" has started
+2021-03-16 11:26:32.370 UTC [76] LOG:  logical replication table synchronization worker for subscription "subhashes", table "hashes" has started
+2021-03-16 11:26:32.395 UTC [76] LOG:  logical replication table synchronization worker for subscription "subhashes", table "hashes" has finished
+```
+
+```bash
+# count replicated data
+docker container exec -it pgsubscriber /bin/sh
+/ # psql -U postgres
+psql (11.10)
+Type "help" for help.
+
+postgres=# \c replication_repl
+You are now connected to database "replication_repl" as user "postgres".
+replication_repl=# SELECT COUNT(*) FROM hashes;
+ count
+-------
+  1000
+(1 row)
+
+replication_repl=# exit
+/ # exit
+```
+
+```bash
+# cleanup
+docker stop pgsubscriber && docker rm pgsubscriber
+docker stop pgprovider && docker rm pgprovider
+docker network rm pg-network
+```
+
 ## Resources
 
 - [PostgreSQL replication with Docker](https://medium.com/swlh/postgresql-replication-with-docker-c6a904becf77)
