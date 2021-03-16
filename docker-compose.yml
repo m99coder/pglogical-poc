@@ -1,26 +1,17 @@
 version: "3"
 services:
-  pg_provider:
+  provider:
     build: ./provider
     environment:
-      - POSTGRES_USER=user-provider
-      - POSTGRES_PASSWORD=password-provider
-      - POSTGRES_DB=database-provider
-      - PG_REP_USER=user-subscriber
-      - PG_REP_PASSWORD=password-subscriber
+      - POSTGRES_PASSWORD=s3cr3t
     networks:
       default:
         aliases:
           - pg_cluster
-  pg_subscriber:
+  subscriber:
     build: ./subscriber
     environment:
-      - POSTGRES_USER=user-provider
-      - POSTGRES_PASSWORD=password-provider
-      - POSTGRES_DB=database-provider
-      - PG_REP_USER=user-subscriber
-      - PG_REP_PASSWORD=password-subscriber
-      - PG_MASTER_HOST=pg_provider
+      - POSTGRES_PASSWORD=s3cr3t
     networks:
       default:
         aliases:

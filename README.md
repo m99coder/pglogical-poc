@@ -105,30 +105,22 @@ SELECT pglogical.replication_set_add_table(
 
 ## Setup
 
+In this PoC we logically replicate from a PostgreSQL 11.5 to a PostgreSQL 11.10. Both instances running in Docker containers and communicating with each other. Both have pglogical 2.2.2 installed.
+
 ```bash
 # start containers
-docker-compose up
+docker-compose up -d
 
-# connect to provider
-docker exec -it pglogical-poc_pg_provider_1 /bin/bash
+# in case we need to rebuilt the images use
+docker-compose up -d --build
 
-root@ebf833a4142a:/# PGPASSWORD=password-provider psql -U "user-provider" database-provider
-
-database-provider=# SELECT * FROM pg_extension;
- extname | extowner | extnamespace | extrelocatable | extversion | extconfig | extcondition
----------+----------+--------------+----------------+------------+-----------+--------------
- plpgsql |       10 |           11 | f              | 1.0        |           |
-(1 row)
-
-database-provider=# CREATE EXTENSION IF NOT EXISTS pglogical;
-CREATE EXTENSION
-
-database-provider=#
+# stop containers
+docker-compose down
 ```
 
 ## Resources
 
-- [docker-pglogical](https://github.com/juxtin/docker-pglogical/)
+- [docker-pglogical](https://github.com/reediculous456/docker-pglogical/blob/master/Dockerfile)
 - [Demystifying pglogical](http://thedumbtechguy.blogspot.com/2017/04/demystifying-pglogical-tutorial.html)
 - [Short tutorial to setup replication using pglogical](https://gist.github.com/ratnakri/c22a7389d9fab788d7b8b12e2a6c337a)
 - [How to configure pglogical](https://www.tutorialdba.com/2018/01/how-to-configure-pglogical-streaming.html)
