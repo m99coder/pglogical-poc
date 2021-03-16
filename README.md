@@ -2,6 +2,10 @@
 
 > Replicate from PostgreSQL 11.5 to 11.10 using pglogical 2.2.2
 
+- [Manually setting up built-in logical replication](MANUAL.md)
+- [Docker Compose Network checks](NETWORK.md)
+- [pglogical-docs](PGLOGICAL.md)
+
 ## Setup
 
 In this PoC we logically replicate from a PostgreSQL 11.5 to a PostgreSQL 11.10. Both instances running in Docker containers and communicating with each other. Both have pglogical 2.2.2 installed.
