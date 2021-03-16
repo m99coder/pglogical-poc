@@ -2,6 +2,8 @@
 
 > Replicate from PostgreSQL 11.5 to 11.10 using pglogical 2.2.2
 
+> :warning: **Work in progress**
+
 - [Manually setting up built-in logical replication](MANUAL.md)
 - [Docker Compose Network checks](NETWORK.md)
 - [pglogical-docs](PGLOGICAL.md)
