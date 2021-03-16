@@ -120,6 +120,7 @@ docker-compose down
 
 ## Resources
 
+- [Dockerfile](https://gist.github.com/asaaki/b07dccfd6ff6eed4c7b4ef279ade7b0c)
 - [docker-pglogical](https://github.com/reediculous456/docker-pglogical/blob/master/Dockerfile)
 - [Demystifying pglogical](http://thedumbtechguy.blogspot.com/2017/04/demystifying-pglogical-tutorial.html)
 - [Short tutorial to setup replication using pglogical](https://gist.github.com/ratnakri/c22a7389d9fab788d7b8b12e2a6c337a)
