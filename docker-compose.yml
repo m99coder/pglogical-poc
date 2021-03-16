@@ -5,7 +5,7 @@ services:
     environment:
       - POSTGRES_PASSWORD=s3cr3t
     volumes:
-      - ./postgresql.conf:/usr/share/postgresql/11/postgresql.conf.sample
+      - ./provider/postgresql.conf:/usr/share/postgresql/11/postgresql.conf.sample
       - ./pg_hba.conf:/usr/share/postgresql/11/pg_hba.conf.sample
   pgsubscriber:
     build: ./subscriber
@@ -14,5 +14,5 @@ services:
     environment:
       - POSTGRES_PASSWORD=s3cr3t
     volumes:
-      - ./postgresql.conf:/usr/share/postgresql/11/postgresql.conf.sample
+      - ./subscriber/postgresql.conf:/usr/share/postgresql/11/postgresql.conf.sample
       - ./pg_hba.conf:/usr/share/postgresql/11/pg_hba.conf.sample
