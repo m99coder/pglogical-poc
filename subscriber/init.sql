@@ -12,14 +12,14 @@ CREATE EXTENSION pglogical;
 -- create node
 SELECT pglogical.create_node(
   node_name := 'subscriber',
-  dsn := 'host=host.docker.internal port=5999 dbname=postgres'
+  dsn := 'host=127.0.0.1 port=5999 dbname=logging user=replicator password=my_replicator_password'
 );
 
 -- create subscription
 SELECT pglogical.create_subscription(
   subscription_name := 'subscription',
   replication_sets := array['logging'],
-  provider_dsn := 'host=host.docker.internal port=5432 dbname=postgres'
+  provider_dsn := 'host=127.0.0.1 port=5432 dbname=logging user=replicator password=my_replicator_password'
 );
 
 -- test replication

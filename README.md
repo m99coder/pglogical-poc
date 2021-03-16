@@ -118,11 +118,12 @@ docker-compose up -d --build
 docker-compose ps
 
 # stop containers
-docker-compose down
+docker-compose down --rmi all
 ```
 
 ## Resources
 
+- [PostgreSQL replication with Docker](https://medium.com/swlh/postgresql-replication-with-docker-c6a904becf77)
 - [Dockerfile](https://gist.github.com/asaaki/b07dccfd6ff6eed4c7b4ef279ade7b0c)
 - [docker-pglogical](https://github.com/reediculous456/docker-pglogical/blob/master/Dockerfile)
 - [Demystifying pglogical](http://thedumbtechguy.blogspot.com/2017/04/demystifying-pglogical-tutorial.html)

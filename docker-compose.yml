@@ -4,19 +4,23 @@ services:
     build: ./provider
     environment:
       - POSTGRES_PASSWORD=s3cr3t
+      - POSTGRES_DB=logging
     ports:
-      - 5432:5432
-    networks:
-      default:
-        aliases:
-          - pg_cluster
+      - "127.0.0.1:5432:5432"
+    restart: always
+    volumes:
+      - ./provider/data:/var/lib/postgresql/data
+      - ./provider/postgresql.conf:/usr/share/postgresql/11/postgresql.conf.sample
+      - ./provider/pg_hba.conf:/usr/share/postgresql/11/pg_hba.conf.sample
   subscriber:
     build: ./subscriber
     environment:
       - POSTGRES_PASSWORD=s3cr3t
+      - POSTGRES_DB=logging
     ports:
-      - 5999:5432
-    networks:
-      default:
-        aliases:
-          - pg_cluster
+      - "127.0.0.1:5999:5432"
+    restart: always
+    volumes:
+      - ./subscriber/data:/var/lib/postgresql/data
+      - ./subscriber/postgresql.conf:/usr/share/postgresql/11/postgresql.conf.sample
+      - ./subscriber/pg_hba.conf:/usr/share/postgresql/11/pg_hba.conf.sample
