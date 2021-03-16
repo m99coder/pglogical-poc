@@ -114,6 +114,9 @@ docker-compose up -d
 # in case we need to rebuilt the images use
 docker-compose up -d --build
 
+# running services
+docker-compose ps
+
 # stop containers
 docker-compose down
 ```
@@ -126,3 +129,4 @@ docker-compose down
 - [Short tutorial to setup replication using pglogical](https://gist.github.com/ratnakri/c22a7389d9fab788d7b8b12e2a6c337a)
 - [How to configure pglogical](https://www.tutorialdba.com/2018/01/how-to-configure-pglogical-streaming.html)
 - [PostgreSQL – logical replication with pglogical](https://blog.dbi-services.com/postgresql-logical-replication-with-pglogical/)
+- [PG Phriday: Perfectly Logical](http://bonesmoses.org/2016/10/14/pg-phriday-perfectly-logical/)

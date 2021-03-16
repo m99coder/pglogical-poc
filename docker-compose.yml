@@ -4,6 +4,8 @@ services:
     build: ./provider
     environment:
       - POSTGRES_PASSWORD=s3cr3t
+    ports:
+      - 5432:5432
     networks:
       default:
         aliases:
@@ -12,6 +14,8 @@ services:
     build: ./subscriber
     environment:
       - POSTGRES_PASSWORD=s3cr3t
+    ports:
+      - 5999:5432
     networks:
       default:
         aliases:

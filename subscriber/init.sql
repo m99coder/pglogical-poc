@@ -1,14 +1,27 @@
+-- dummy data
+CREATE TABLE sensor_log (
+  id           INT PRIMARY KEY NOT NULL,
+  location     VARCHAR NOT NULL,
+  reading      BIGINT NOT NULL,
+  reading_date TIMESTAMP NOT NULL
+);
+
 -- create extension
-CREATE EXTENSION IF NOT EXISTS pglogical;
+CREATE EXTENSION pglogical;
 
 -- create node
 SELECT pglogical.create_node(
   node_name := 'subscriber',
-  dsn := 'host=0.0.0.0 port=5433 dbname=postgres'
+  dsn := 'host=host.docker.internal port=5999 dbname=postgres'
 );
 
 -- create subscription
 SELECT pglogical.create_subscription(
   subscription_name := 'subscription',
-  provider_dsn := 'host=0.0.0.0 port=5432 dbname=postgres'
+  replication_sets := array['logging'],
+  provider_dsn := 'host=host.docker.internal port=5432 dbname=postgres'
 );
+
+-- test replication
+SELECT pg_sleep(5);
+SELECT COUNT(*) FROM sensor_log;
