@@ -2,8 +2,6 @@
 
 > Replicate from PostgreSQL 11.5 to 11.10 using pglogical 2.2.2
 
-> :warning: **Work in progress**
-
 - [Manually setting up built-in logical replication](MANUAL.md)
 - [Docker Compose Network checks](NETWORK.md)
 - [pglogical-docs](PGLOGICAL.md)
@@ -26,67 +24,86 @@ docker-compose ps
 docker-compose down --rmi all
 ```
 
-Now create node and subscription manually for `pgsubscriber`.
+Now run replication queries:
 
 ```bash
-docker exec -it pglogical-poc_pgsubscriber_1 psql -U postgres -d pg_logical_replication_results
-psql (11.10 (Debian 11.10-1.pgdg90+1))
-Type "help" for help.
+# first for the provider:
+#   - pglogical.create_node
+#   - pglogical.create_replication_set
+#   - pglogical.replication_set_add_table
+docker exec -it pglogical-poc_pgprovider_1 psql -U postgres -d pg_logical_replication -f /replication.sql
 
-pg_logical_replication_results=# \dx
-                   List of installed extensions
-   Name    | Version |   Schema   |          Description
------------+---------+------------+--------------------------------
- pglogical | 2.2.2   | pglogical  | PostgreSQL Logical Replication
- plpgsql   | 1.0     | pg_catalog | PL/pgSQL procedural language
-(2 rows)
-
-pg_logical_replication_results=# SELECT pglogical.create_node(
-pg_logical_replication_results(#   node_name := 'subscriber',
-pg_logical_replication_results(#   dsn := 'host=pgsubscriber port=5432 dbname=pg_logical_replication_results user=postgres password=s3cr3t'
-pg_logical_replication_results(# );
- create_node
--------------
-  2941155235
-(1 row)
-
-pg_logical_replication_results=# SELECT pglogical.create_subscription(
-pg_logical_replication_results(#   subscription_name := 'subscription',
-pg_logical_replication_results(#   replication_sets := array['hashes'],
-pg_logical_replication_results(#   provider_dsn := 'host=pgprovider port=5432 dbname=pg_logical_replication user=postgres password=s3cr3t'
-pg_logical_replication_results(# );
- create_subscription
----------------------
-          2875150205
-(1 row)
-
-pg_logical_replication_results=# SELECT COUNT(*) FROM hashes;
- count
--------
-  1000
-(1 row)
-
-pg_logical_replication_results=# exit
+# second for the subscriber:
+#   - pglogical.create_node
+#   - pglogical.create_subscription
+docker exec -it pglogical-poc_pgsubscriber_1 psql -U postgres -d pg_logical_replication_results -f /replication.sql
 ```
 
-Finally insert new hashes into `pgprovider` and check replication in `pgsubscriber`.
+And finally, check if the correct number of posts was replicated based on the arbitrary row filter `user_id = 1`:
 
 ```bash
-docker exec -it pglogical-poc_pgprovider_1 psql -U postgres -d pg_logical_replication
-psql (11.5 (Debian 11.5-3.pgdg90+1))
-Type "help" for help.
+docker exec -it pglogical-poc_pgprovider_1 psql -U postgres -d pg_logical_replication -c 'SELECT COUNT(*) FROM posts WHERE user_id = 1;'
+ count
+-------
+    19
+(1 row)
 
-pg_logical_replication=# INSERT INTO hashes (SELECT generate_series(1, 1000), md5(random()::TEXT));
+docker exec -it pglogical-poc_pgsubscriber_1 psql -U postgres -d pg_logical_replication_results -c 'SELECT COUNT(*) FROM posts;'
+ count
+-------
+    19
+(1 row)
+```
+
+_The actual number of posts can differ between runs, as the initial data is generated randomly. The important thing is that the two numbers are indeed equal._
+
+Try to add more posts to the provider instance and check if the replication worked.
+
+```bash
+docker exec -it pglogical-poc_pgprovider_1 psql -U postgres -d pg_logical_replication -c 'INSERT INTO posts (SELECT generate_series(1001, 2000), FLOOR(random()*50)+1);'
 INSERT 0 1000
-pg_logical_replication=# exit
 ```
 
-```bash
-docker exec -it pglogical-poc_pgsubscriber_1 psql -U postgres -d pg_logical_replication_results -c 'SELECT COUNT(*) FROM hashes;'
- count
--------
-  2000
-(1 row)
+SQL queries as plain text for convenience:
+
+```sql
+-- pgprovider
+-- create node
+SELECT pglogical.create_node(
+  node_name := 'provider',
+  dsn := 'host=pgprovider port=5432 dbname=pg_logical_replication user=postgres password=s3cr3t'
+);
+
+-- create replication set
+SELECT pglogical.create_replication_set(
+  set_name := 'posts',
+  replicate_insert := TRUE,
+  replicate_update := FALSE,
+  replicate_delete := FALSE,
+  replicate_truncate := FALSE
+);
+
+-- add table to replication set
+SELECT pglogical.replication_set_add_table(
+  set_name := 'posts',
+  relation := 'posts',
+  row_filter := 'user_id = 1',
+  synchronize_data := TRUE
+);
+
+-- pgsubscriber
+-- create subscriber node
+SELECT pglogical.create_node(
+  node_name := 'subscriber',
+  dsn := 'host=pgsubscriber port=5432 dbname=pg_logical_replication_results user=postgres password=s3cr3t'
+);
+
+-- create subscription
+SELECT pglogical.create_subscription(
+  subscription_name := 'subscription',
+  replication_sets := array['posts'],
+  provider_dsn := 'host=pgprovider port=5432 dbname=pg_logical_replication user=postgres password=s3cr3t'
+);
 ```
 
 ## Resources
