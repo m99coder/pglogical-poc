@@ -88,13 +88,3 @@ SELECT pglogical.create_subscription(
 ```
 
 Replication sets provide a mechanism to control which tables in the database will be replicated and which actions on those tables will be replicated. Each replicated set can specify individually if `INSERT`s, `UPDATE`s, `DELETE`s and `TRUCATE`s on the set are replicated. Every table can be in multiple replication sets and every subscriber can subscribe to multiple replication sets as well. The resulting set of tables and actions replicated is the union of the sets the table is in. The tables are not replicated until they are added into a replication set.
-
-### Row based filtering
-
-```sql
-SELECT pglogical.replication_set_add_table(
-  set_name := 'default',
-  relation := 'public.spaces',
-  row_filter := 'SELECT * FROM public.spaces WHERE space_id = 1'
-);
-```
