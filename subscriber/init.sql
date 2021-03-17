@@ -18,7 +18,7 @@ CREATE EXTENSION pglogical;
 -- create node
 SELECT pglogical.create_node(
   node_name := 'subscriber',
-  dsn := 'host=pgsubscriber port=5433 dbname=pg_logical_replication_results user=replicate password=qwertz'
+  dsn := 'host=pgsubscriber port=5432 dbname=pg_logical_replication_results user=replicate password=qwertz'
 );
 
 -- create subscription
