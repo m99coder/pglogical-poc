@@ -31,24 +31,30 @@ Now run replication queries:
 #   - pglogical.create_node
 #   - pglogical.create_replication_set
 #   - pglogical.replication_set_add_table
-docker exec -it pglogical-poc_pgprovider_1 psql -U postgres -d pg_logical_replication -f /replication.sql
+docker exec -it pglogical-poc_pgprovider_1 \
+  psql -U postgres -d pg_logical_replication -f /replication.sql
 
 # second for the subscriber:
 #   - pglogical.create_node
 #   - pglogical.create_subscription
-docker exec -it pglogical-poc_pgsubscriber_1 psql -U postgres -d pg_logical_replication_results -f /replication.sql
+docker exec -it pglogical-poc_pgsubscriber_1 \
+  psql -U postgres -d pg_logical_replication_results -f /replication.sql
 ```
 
 And finally, check if the correct number of posts was replicated based on the arbitrary row filter `user_id = 1`:
 
 ```bash
-docker exec -it pglogical-poc_pgprovider_1 psql -U postgres -d pg_logical_replication -c 'SELECT COUNT(*) FROM posts WHERE user_id = 1;'
+docker exec -it pglogical-poc_pgprovider_1 \
+  psql -U postgres -d pg_logical_replication \
+    -c 'SELECT COUNT(*) FROM posts WHERE user_id = 1;'
  count
 -------
     19
 (1 row)
 
-docker exec -it pglogical-poc_pgsubscriber_1 psql -U postgres -d pg_logical_replication_results -c 'SELECT COUNT(*) FROM posts;'
+docker exec -it pglogical-poc_pgsubscriber_1 \
+  psql -U postgres -d pg_logical_replication_results \
+    -c 'SELECT COUNT(*) FROM posts;'
  count
 -------
     19
@@ -60,7 +66,9 @@ _The actual number of posts can differ between runs, as the initial data is gene
 Try to add more posts to the provider instance and check if the replication worked.
 
 ```bash
-docker exec -it pglogical-poc_pgprovider_1 psql -U postgres -d pg_logical_replication -c 'INSERT INTO posts (SELECT generate_series(1001, 2000), FLOOR(random()*50)+1);'
+docker exec -it pglogical-poc_pgprovider_1 \
+  psql -U postgres -d pg_logical_replication \
+    -c 'INSERT INTO posts (SELECT generate_series(1001, 2000), FLOOR(random()*50)+1);'
 INSERT 0 1000
 ```
 
