@@ -181,20 +181,18 @@ pg_logical_replication=# exit
 
 <details>
   <summary>Column descriptions</summary>
-| Column                | Type      | Description                                                                                                                                                                                                        |
-| --------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `slot_name`           | `name`    | A unique, cluster-wide identifier for the replication slot                                                                                                                                                         |
-| `plugin`              | `name`    | The base name of the shared object containing the output plugin this logical slot is using, or null for physical slots.                                                                                            |
-| `slot_type`           | `text`    | The slot type - `physical` or `logical`                                                                                                                                                                            |
-| `datoid`              | `oid`     | The OID of the database this slot is associated with, or null. Only logical slots have an associated database.                                                                                                     |
-| `database`            | `text`    | The name of the database this slot is associated with, or null. Only logical slots have an associated database.                                                                                                    |
-| `temporary`           | `boolean` | True if this is a temporary replication slot. Temporary slots are not saved to disk and are automatically dropped on error or when the session has finished.                                                       |
-| `active`              | `boolean` | True if this slot is currently actively being used                                                                                                                                                                 |
-| `active_pid`          | `integer` | The process ID of the session using this slot if the slot is currently actively being used. `NULL` if inactive.                                                                                                    |
-| `xmin`                | `xid`     | The oldest transaction that this slot needs the database to retain. `VACUUM` cannot remove tuples deleted by any later transaction.                                                                                |
-| `catalog_xmin`        | `xid`     | The oldest transaction affecting the system catalogs that this slot needs the database to retain. `VACUUM` cannot remove catalog tuples deleted by any later transaction.                                          |
-| `restart_lsn`         | `pg_lsn`  | The address (`LSN`) of oldest WAL which still might be required by the consumer of this slot and thus won’t be automatically removed during checkpoints. `NULL` if the `LSN` of this slot has never been reserved. |
-| `confirmed_flush_lsn` | `pg_lsn`  | The address (`LSN`) up to which the logical slot’s consumer has confirmed receiving data. Data older than this is not available anymore. `NULL` for physical slots.                                                |
+  - `slot_name`: A unique, cluster-wide identifier for the replication slot
+  - `plugin`: The base name of the shared object containing the output plugin this logical slot is using, or null for physical slots.
+  - `slot_type`: The slot type - `physical` or `logical`
+  - `datoid`: The OID of the database this slot is associated with, or null. Only logical slots have an associated database.
+  - `database`: The name of the database this slot is associated with, or null. Only logical slots have an associated database.
+  - `temporary`: True if this is a temporary replication slot. Temporary slots are not saved to disk and are automatically dropped on error or when the session has finished.
+  - `active`: True if this slot is currently actively being used
+  - `active_pid`: The process ID of the session using this slot if the slot is currently actively being used. `NULL` if inactive.
+  - `xmin`: The oldest transaction that this slot needs the database to retain. `VACUUM` cannot remove tuples deleted by any later transaction.
+  - `catalog_xmin`: The oldest transaction affecting the system catalogs that this slot needs the database to retain. `VACUUM` cannot remove catalog tuples deleted by any later transaction.
+  - `restart_lsn`: The address (`LSN`) of oldest WAL which still might be required by the consumer of this slot and thus won’t be automatically removed during checkpoints. `NULL` if the `LSN` of this slot has never been reserved.
+  - `confirmed_flush_lsn`: The address (`LSN`) up to which the logical slot’s consumer has confirmed receiving data. Data older than this is not available anymore. `NULL` for physical slots.
 
 The `pg_lsn` data type can be used to store LSN (Log Sequence Number) data which is a pointer to a location in the WAL. This type is a representation of `XLogRecPtr` and an internal system type of PostgreSQL.
 
