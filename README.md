@@ -179,7 +179,9 @@ confirmed_flush_lsn | 0/1826A68
 pg_logical_replication=# exit
 ```
 
-| Name                  | Type      | Description                                                                                                                                                                                                        |
+<details>
+  <summary>Column descriptions</summary>
+| Column                | Type      | Description                                                                                                                                                                                                        |
 | --------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `slot_name`           | `name`    | A unique, cluster-wide identifier for the replication slot                                                                                                                                                         |
 | `plugin`              | `name`    | The base name of the shared object containing the output plugin this logical slot is using, or null for physical slots.                                                                                            |
@@ -193,6 +195,71 @@ pg_logical_replication=# exit
 | `catalog_xmin`        | `xid`     | The oldest transaction affecting the system catalogs that this slot needs the database to retain. `VACUUM` cannot remove catalog tuples deleted by any later transaction.                                          |
 | `restart_lsn`         | `pg_lsn`  | The address (`LSN`) of oldest WAL which still might be required by the consumer of this slot and thus won’t be automatically removed during checkpoints. `NULL` if the `LSN` of this slot has never been reserved. |
 | `confirmed_flush_lsn` | `pg_lsn`  | The address (`LSN`) up to which the logical slot’s consumer has confirmed receiving data. Data older than this is not available anymore. `NULL` for physical slots.                                                |
+
+The `pg_lsn` data type can be used to store LSN (Log Sequence Number) data which is a pointer to a location in the WAL. This type is a representation of `XLogRecPtr` and an internal system type of PostgreSQL.
+
+Internally, an LSN is a 64-bit integer, representing a byte position in the write-ahead log stream. It is printed as two hexadecimal numbers of up to 8 digits each, separated by a slash; for example, `16/B374D848`. The `pg_lsn` type supports the standard comparison operators, like `=` and `>`. Two LSNs can be subtracted using the `-` operator; the result is the number of bytes separating those write-ahead log locations.
+
+</details>
+
+```bash
+# check replication status on provider
+docker exec -it pglogical-poc_pgprovider_1 \
+  psql -U postgres -d pg_logical_replication
+psql (11.5 (Debian 11.5-3.pgdg90+1))
+Type "help" for help.
+
+pg_logical_replication=# \x
+Expanded display is on.
+pg_logical_replication=# SELECT * FROM pg_stat_replication;
+-[ RECORD 1 ]----+------------------------------
+pid              | 103
+usesysid         | 10
+usename          | postgres
+application_name | subscription
+client_addr      | 192.168.96.3
+client_hostname  |
+client_port      | 55122
+backend_start    | 2021-03-17 14:20:21.858559+00
+backend_xmin     |
+state            | streaming
+sent_lsn         | 0/1826A68
+write_lsn        | 0/1826A68
+flush_lsn        | 0/1826A68
+replay_lsn       | 0/1826A68
+write_lag        |
+flush_lag        |
+replay_lag       |
+sync_priority    | 0
+sync_state       | async
+
+pg_logical_replication=# exit
+```
+
+<details>
+  <summary>Column descriptions</summary>
+| Column             | Type                       | Description                                                                                                                                                                                                                                                                                                                                                                                |
+| ------------------ | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `pid`              | `integer`                  | Process ID of a WAL sender process                                                                                                                                                                                                                                                                                                                                                         |
+| `usesysid`         | `oid`                      | OID of the user logged into this WAL sender process                                                                                                                                                                                                                                                                                                                                        |
+| `usename`          | `name`                     | Name of the user logged into this WAL sender process                                                                                                                                                                                                                                                                                                                                       |
+| `application_name` | `text`                     | Name of the application that is connected to this WAL sender                                                                                                                                                                                                                                                                                                                               |
+| `client_addr`      | `inet`                     | IP address of the client connected to this WAL sender. If this field is `NULL`, it indicates that the client is connected via a Unix socket on the server machine.                                                                                                                                                                                                                         |
+| `client_hostname`  | `text`                     | Host name of the connected client, as reported by a reverse DNS lookup of `client_addr`. This field will only be non-null for IP connections, and only when `log_hostname` is enabled.                                                                                                                                                                                                     |
+| `client_port`      | `integer`                  | TCP port number that the client is using for communication with this WAL sender, or `-1` if a Unix socket is used                                                                                                                                                                                                                                                                          |
+| `backend_start`    | `timestamp with time zone` | Time when this process was started, i.e., when the client connected to this WAL sender                                                                                                                                                                                                                                                                                                     |
+| `backend_xmin`     | `xid`                      | This standby’s `xmin` horizon reported by `hot_standby_feedback`.                                                                                                                                                                                                                                                                                                                          |
+| `state`            | `text`                     | Current WAL sender state. Possible values are: `startup` (This WAL sender is starting up), `catchup` (This WAL sender’s connected standby is catching up with the primary), `streaming` (This WAL sender is streaming changes after its connected standby server has caught up with the primary), `backup` (This WAL sender is sending a backup), `stopping` (This WAL sender is stopping) |
+| `sent_lsn`         | `pg_lsn`                   | Last write-ahead log location sent on this connection                                                                                                                                                                                                                                                                                                                                      |
+| `write_lsn`        | `pg_lsn`                   | Last write-ahead log location written to disk by this standby server                                                                                                                                                                                                                                                                                                                       |
+| `flush_lsn`        | `pg_lsn`                   | Last write-ahead log location flushed to disk by this standby server                                                                                                                                                                                                                                                                                                                       |
+| `replay_lsn`       | `pg_lsn`                   | Last write-ahead log location replayed into the database on this standby server                                                                                                                                                                                                                                                                                                            |
+| `write_lag`        | `interval`                 | Time elapsed between flushing recent WAL locally and receiving notification that this standby server has written it (but not yet flushed it or applied it). This can be used to gauge the delay that `synchronous_commit` level `remote_write` incurred while committing if this server was configured as a synchronous standby.                                                           |
+| `flush_lag`        | `interval`                 | Time elapsed between flushing recent WAL locally and receiving notification that this standby server has written and flushed it (but not yet applied it). This can be used to gauge the delay that `synchronous_commit` level on incurred while committing if this server was configured as a synchronous standby.                                                                         |
+| `replay_lag`       | `interval`                 | Time elapsed between flushing recent WAL locally and receiving notification that this standby server has written, flushed and applied it. This can be used to gauge the delay that `synchronous_commit` level `remote_apply` incurred while committing if this server was configured as a synchronous standby.                                                                             |
+| `sync_priority`    | `integer`                  | Priority of this standby server for being chosen as the synchronous standby in a priority-based synchronous replication. This has no effect in a quorum-based synchronous replication.                                                                                                                                                                                                     |
+| `sync_state`       | `text`                     | Synchronous state of this standby server. Possible values are: `async` (This standby server is asynchronous), `potential` (This standby server is now asynchronous, but can potentially become synchronous if one of current synchronous ones fails.), `sync` (This standby server is synchronous), `quorum` (This standby server is considered as a candidate for quorum standbys)        |
+</details>
 
 ```bash
 # check local sync status on subscriber
