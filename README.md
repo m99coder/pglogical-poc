@@ -182,6 +182,22 @@ pg_logical_replication=# exit
 Find column descriptions [here](https://www.postgresql.org/docs/11/view-pg-replication-slots.html).
 
 ```bash
+# check current WAL insert LSN
+docker exec -it pglogical-poc_pgprovider_1 \
+  psql -U postgres -d pg_logical_replication
+psql (11.5 (Debian 11.5-3.pgdg90+1))
+Type "help" for help.
+
+pg_logical_replication=# \x
+Expanded display is on.
+pg_logical_replication=# SELECT pg_current_wal_insert_lsn();
+-[ RECORD 1 ]-------------+----------
+pg_current_wal_insert_lsn | 0/18264A8
+
+pg_logical_replication=# exit
+```
+
+```bash
 # check replication status on provider
 docker exec -it pglogical-poc_pgprovider_1 \
   psql -U postgres -d pg_logical_replication
@@ -192,25 +208,39 @@ pg_logical_replication=# \x
 Expanded display is on.
 pg_logical_replication=# SELECT * FROM pg_stat_replication;
 -[ RECORD 1 ]----+------------------------------
-pid              | 103
+pid              | 101
 usesysid         | 10
 usename          | postgres
 application_name | subscription
-client_addr      | 192.168.96.3
+client_addr      | 192.168.128.3
 client_hostname  |
-client_port      | 55122
-backend_start    | 2021-03-17 14:20:21.858559+00
+client_port      | 58410
+backend_start    | 2021-03-17 16:48:24.83939+00
 backend_xmin     |
 state            | streaming
-sent_lsn         | 0/1826A68
-write_lsn        | 0/1826A68
-flush_lsn        | 0/1826A68
-replay_lsn       | 0/1826A68
+sent_lsn         | 0/18264A8
+write_lsn        | 0/18264A8
+flush_lsn        | 0/18264A8
+replay_lsn       | 0/18264A8
 write_lag        |
 flush_lag        |
 replay_lag       |
 sync_priority    | 0
 sync_state       | async
+
+pg_logical_replication=# SELECT pg_size_pretty(pg_current_wal_insert_lsn() - '0/00000000'::pg_lsn);
+-[ RECORD 1 ]--+------
+pg_size_pretty | 24 MB
+
+pg_logical_replication=# SELECT
+pg_logical_replication-#   pg_current_wal_insert_lsn(),
+pg_logical_replication-#   replay_lsn,
+pg_logical_replication-#   pg_size_pretty(pg_current_wal_insert_lsn() - replay_lsn::pg_lsn) AS diff
+pg_logical_replication-# FROM pg_stat_replication;
+-[ RECORD 1 ]-------------+----------
+pg_current_wal_insert_lsn | 0/1826588
+replay_lsn                | 0/1826588
+diff                      | 0 bytes
 
 pg_logical_replication=# exit
 ```
@@ -233,7 +263,7 @@ sync_subid     | 2875150205
 sync_nspname   | public
 sync_relname   | posts
 sync_status    | r
-sync_statuslsn | 0/1822C70
+sync_statuslsn | 0/1822758
 -[ RECORD 2 ]--+-----------
 sync_kind      | d
 sync_subid     | 2875150205
