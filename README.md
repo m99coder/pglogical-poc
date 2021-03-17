@@ -26,27 +26,71 @@ docker-compose ps
 docker-compose down --rmi all
 ```
 
-## Current Issue
-
-As soon as `pglogical` is integrated (as part of applying `init.sql` to both Postgres instances), the instances **can’t** communicate with each other:
+Now create node and subscription manually for `pgsubscriber`.
 
 ```bash
-pgsubscriber_1  | 2021-03-17 07:58:44.040 GMT [78] ERROR:  could not connect to the postgresql server: could not connect to server: Connection refused
-pgsubscriber_1  | 		Is the server running on host "pgsubscriber" (172.19.0.3) and accepting
-pgsubscriber_1  | 		TCP/IP connections on port 5432?
-pgsubscriber_1  |
-pgsubscriber_1  | 2021-03-17 07:58:44.040 GMT [78] DETAIL:  dsn was:  host=pgsubscriber port=5432 dbname=pg_logical_replication_results user=replicate password=qwertz
-pgsubscriber_1  | 2021-03-17 07:58:44.040 GMT [78] STATEMENT:  SELECT pglogical.create_subscription(
-pgsubscriber_1  | 	  subscription_name := 'subscription',
-pgsubscriber_1  | 	  replication_sets := array['hashes'],
-pgsubscriber_1  | 	  provider_dsn := 'host=pgprovider port=5432 dbname=pg_logical_replication user=replicate password=qwertz'
-pgsubscriber_1  | 	);
-pgsubscriber_1  | psql:/docker-entrypoint-initdb.d/init.sql:29: ERROR:  could not connect to the postgresql server: could not connect to server: Connection refused
-pgsubscriber_1  | 	Is the server running on host "pgsubscriber" (172.19.0.3) and accepting
-pgsubscriber_1  | 	TCP/IP connections on port 5432?
-pgsubscriber_1  |
-pgsubscriber_1  | DETAIL:  dsn was:  host=pgsubscriber port=5432 dbname=pg_logical_replication_results user=replicate password=qwertz
-pglogical-poc_pgsubscriber_1 exited with code 3
+docker exec -it pglogical-poc_pgsubscriber_1 psql -U postgres
+psql (11.10 (Debian 11.10-1.pgdg90+1))
+Type "help" for help.
+
+postgres=# \c pg_logical_replication_results
+You are now connected to database "pg_logical_replication_results" as user "postgres".
+pg_logical_replication_results=# \dx
+                   List of installed extensions
+   Name    | Version |   Schema   |          Description
+-----------+---------+------------+--------------------------------
+ pglogical | 2.2.2   | pglogical  | PostgreSQL Logical Replication
+ plpgsql   | 1.0     | pg_catalog | PL/pgSQL procedural language
+(2 rows)
+
+pg_logical_replication_results=# SELECT pglogical.create_node(
+pg_logical_replication_results(#   node_name := 'subscriber',
+pg_logical_replication_results(#   dsn := 'host=pgsubscriber port=5432 dbname=pg_logical_replication_results user=postgres password=s3cr3t'
+pg_logical_replication_results(# );
+ create_node
+-------------
+  2941155235
+(1 row)
+
+pg_logical_replication_results=# SELECT pglogical.create_subscription(
+pg_logical_replication_results(#   subscription_name := 'subscription',
+pg_logical_replication_results(#   replication_sets := array['hashes'],
+pg_logical_replication_results(#   provider_dsn := 'host=pgprovider port=5432 dbname=pg_logical_replication user=postgres password=s3cr3t'
+pg_logical_replication_results(# );
+ create_subscription
+---------------------
+          2875150205
+(1 row)
+
+pg_logical_replication_results=# SELECT COUNT(*) FROM hashes;
+ count
+-------
+  1000
+(1 row)
+
+pg_logical_replication_results=# exit
+```
+
+Finally insert new hashes into `pgprovider` and check replication in `pgsubscriber`.
+
+```bash
+docker exec -it pglogical-poc_pgprovider_1 psql -U postgres
+psql (11.5 (Debian 11.5-3.pgdg90+1))
+Type "help" for help.
+
+postgres=# \c pg_logical_replication
+You are now connected to database "pg_logical_replication" as user "postgres".
+pg_logical_replication=# INSERT INTO hashes (SELECT generate_series(1, 1000), md5(random()::TEXT));
+INSERT 0 1000
+pg_logical_replication=# exit
+```
+
+```bash
+docker exec -it pglogical-poc_pgsubscriber_1 psql -U postgres -d pg_logical_replication_results -c 'SELECT COUNT(*) FROM hashes;'
+ count
+-------
+  2000
+(1 row)
 ```
 
 ## Resources

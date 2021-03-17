@@ -9,8 +9,8 @@ CREATE TABLE hashes (id SERIAL, value CHAR(33), PRIMARY KEY(value));
 INSERT INTO hashes (SELECT generate_series(1, 1000), md5(random()::TEXT));
 
 -- create role and grant rights
-CREATE ROLE replicate WITH LOGIN PASSWORD 'qwertz' REPLICATION;
-GRANT SELECT ON hashes TO replicate;
+-- CREATE ROLE replicate WITH LOGIN PASSWORD 'qwertz' REPLICATION;
+-- GRANT SELECT ON hashes TO replicate;
 
 -- -- create publication
 -- CREATE PUBLICATION pub_hashes FOR TABLE hashes;
@@ -18,13 +18,10 @@ GRANT SELECT ON hashes TO replicate;
 -- create extension
 CREATE EXTENSION pglogical;
 
--- grant privileges
-GRANT USAGE ON SCHEMA pglogical TO replicate;
-
 -- create node
 SELECT pglogical.create_node(
   node_name := 'provider',
-  dsn := 'host=pgprovider port=5432 dbname=pg_logical_replication user=replicate password=qwertz'
+  dsn := 'host=pgprovider port=5432 dbname=pg_logical_replication user=postgres password=s3cr3t'
 );
 
 -- create replication set and add table
