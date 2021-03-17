@@ -29,12 +29,10 @@ docker-compose down --rmi all
 Now create node and subscription manually for `pgsubscriber`.
 
 ```bash
-docker exec -it pglogical-poc_pgsubscriber_1 psql -U postgres
+docker exec -it pglogical-poc_pgsubscriber_1 psql -U postgres -d pg_logical_replication_results
 psql (11.10 (Debian 11.10-1.pgdg90+1))
 Type "help" for help.
 
-postgres=# \c pg_logical_replication_results
-You are now connected to database "pg_logical_replication_results" as user "postgres".
 pg_logical_replication_results=# \dx
                    List of installed extensions
    Name    | Version |   Schema   |          Description
@@ -74,12 +72,10 @@ pg_logical_replication_results=# exit
 Finally insert new hashes into `pgprovider` and check replication in `pgsubscriber`.
 
 ```bash
-docker exec -it pglogical-poc_pgprovider_1 psql -U postgres
+docker exec -it pglogical-poc_pgprovider_1 psql -U postgres -d pg_logical_replication
 psql (11.5 (Debian 11.5-3.pgdg90+1))
 Type "help" for help.
 
-postgres=# \c pg_logical_replication
-You are now connected to database "pg_logical_replication" as user "postgres".
 pg_logical_replication=# INSERT INTO hashes (SELECT generate_series(1, 1000), md5(random()::TEXT));
 INSERT 0 1000
 pg_logical_replication=# exit
