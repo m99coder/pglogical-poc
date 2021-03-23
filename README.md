@@ -24,6 +24,10 @@ docker-compose ps
 docker-compose down --rmi all
 ```
 
+For a more realistic setup there are three tables created: `users`, `posts`, and `comments`, where `comments` has a foreign key for `posts` and `posts` has a foreign key for `users`. The goal of this PoC is to move everything related to a specific user: 1 row from `users`, x rows from `posts`, and y rows from `comments`.
+
+pglogical currently doesn’t support sub-queries in the `row_filter`. So we need an alternative approach.
+
 Now run replication queries:
 
 ```bash
@@ -154,7 +158,7 @@ The sync states are defined [here](https://github.com/2ndQuadrant/pglogical/blob
 - `c`: `SYNC_STATUS_CONSTAINTS` (Sync constraints)
 - `w`: `SYNC_STATUS_SYNCWAIT` (Table sync is waiting to get OK from main thread)
 - `u`: `SYNC_STATUS_CATCHUP` (Catching up)
-- `y`: `SYNC_STATUS_SYNCDONE` (Sync finished at lsn)
+- `y`: `SYNC_STATUS_SYNCDONE` (Sync finished at LSN)
 - `r`: `SYNC_STATUS_READY` (Sync done)
 
 Determine replication status
