@@ -7,7 +7,7 @@ SELECT pglogical.create_node(
 -- create subscription
 SELECT pglogical.create_subscription(
   subscription_name := 'subscription',
-  replication_sets := array['posts'],
+  replication_sets := array['example'],
   provider_dsn := 'host=pgprovider port=5432 dbname=pg_logical_replication user=postgres password=s3cr3t'
 );
 

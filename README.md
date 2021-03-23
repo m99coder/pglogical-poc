@@ -32,6 +32,8 @@ pglogical currently **doesn’t support sub-queries** in the `row_filter`. So we
 invalid row_filter expression "post_id = IN (SELECT id FROM posts WHERE user_id = 1)"
 ```
 
+For simplicity we choose de-normalizing the foreign key relation from `comments` to `posts` to `users` by adding a `user_id` column to the `comments` table directly, that will be populated with the randomly chosen `user_id` values set in `posts` table.
+
 Now run replication queries:
 
 ```bash
@@ -73,13 +75,30 @@ docker exec -it pglogical-poc_pgsubscriber_1 \
 
 _The actual number of posts can differ between runs, as the initial data is generated randomly. The important thing is that the two numbers are indeed equal._
 
-Try to add more posts to the provider instance and check if the replication worked.
+Try to add more posts and comments to the provider instance and check if the replication worked.
 
 ```bash
 docker exec -it pglogical-poc_pgprovider_1 \
   psql -U postgres -d pg_logical_replication \
     -c 'INSERT INTO posts (SELECT generate_series(1001, 2000), FLOOR(random()*50)+1);'
 INSERT 0 1000
+
+docker exec -it pglogical-poc_pgprovider_1 \
+  psql -U postgres -d pg_logical_replication \
+    -c 'INSERT INTO comments (SELECT generate_series(201, 400), FLOOR(random()*1000)+1);'
+INSERT 0 200
+
+docker exec -it pglogical-poc_pgprovider_1 \
+  psql -U postgres -d pg_logical_replication \
+    -c 'UPDATE comments
+SET user_id = subquery.user_id
+FROM (
+  SELECT posts.user_id, comments.id
+  FROM posts
+  INNER JOIN comments ON posts.id = comments.post_id
+) AS subquery
+WHERE comments.id = subquery.id;'
+UPDATE 400
 ```
 
 SQL queries as plain text for convenience:
@@ -112,12 +131,12 @@ SELECT pglogical.replication_set_add_table(
   synchronize_data := TRUE
 );
 
--- SELECT pglogical.replication_set_add_table(
---   set_name := 'example',
---   relation := 'comments',
---   row_filter := 'post_id = IN (SELECT id FROM posts WHERE user_id = 1)',
---   synchronize_data := TRUE
--- );
+SELECT pglogical.replication_set_add_table(
+  set_name := 'example',
+  relation := 'comments',
+  row_filter := 'user_id = 1',
+  synchronize_data := TRUE
+);
 
 -- pgsubscriber
 -- create subscriber node

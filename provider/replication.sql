@@ -6,17 +6,27 @@ SELECT pglogical.create_node(
 
 -- create replication set
 SELECT pglogical.create_replication_set(
-  set_name := 'posts',
-  replicate_insert := TRUE,
-  replicate_update := FALSE,
-  replicate_delete := FALSE,
-  replicate_truncate := FALSE
+  set_name := 'example'
 );
 
--- add table to replication set
+-- add tables to replication set
 SELECT pglogical.replication_set_add_table(
-  set_name := 'posts',
+  set_name := 'example',
+  relation := 'users',
+  row_filter := 'id = 1',
+  synchronize_data := TRUE
+);
+
+SELECT pglogical.replication_set_add_table(
+  set_name := 'example',
   relation := 'posts',
+  row_filter := 'user_id = 1',
+  synchronize_data := TRUE
+);
+
+SELECT pglogical.replication_set_add_table(
+  set_name := 'example',
+  relation := 'comments',
   row_filter := 'user_id = 1',
   synchronize_data := TRUE
 );
