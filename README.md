@@ -26,7 +26,11 @@ docker-compose down --rmi all
 
 For a more realistic setup there are three tables created: `users`, `posts`, and `comments`, where `comments` has a foreign key for `posts` and `posts` has a foreign key for `users`. The goal of this PoC is to move everything related to a specific user: 1 row from `users`, x rows from `posts`, and y rows from `comments`.
 
-pglogical currently doesn’t support sub-queries in the `row_filter`. So we need an alternative approach.
+pglogical currently **doesn’t support sub-queries** in the `row_filter`. So we need an alternative approach.
+
+```
+invalid row_filter expression "post_id = IN (SELECT id FROM posts WHERE user_id = 1)"
+```
 
 Now run replication queries:
 
@@ -90,20 +94,30 @@ SELECT pglogical.create_node(
 
 -- create replication set
 SELECT pglogical.create_replication_set(
-  set_name := 'posts',
-  replicate_insert := TRUE,
-  replicate_update := FALSE,
-  replicate_delete := FALSE,
-  replicate_truncate := FALSE
+  set_name := 'example'
 );
 
--- add table to replication set
+-- add tables to replication set
 SELECT pglogical.replication_set_add_table(
-  set_name := 'posts',
+  set_name := 'example',
+  relation := 'users',
+  row_filter := 'id = 1',
+  synchronize_data := TRUE
+);
+
+SELECT pglogical.replication_set_add_table(
+  set_name := 'example',
   relation := 'posts',
   row_filter := 'user_id = 1',
   synchronize_data := TRUE
 );
+
+-- SELECT pglogical.replication_set_add_table(
+--   set_name := 'example',
+--   relation := 'comments',
+--   row_filter := 'post_id = IN (SELECT id FROM posts WHERE user_id = 1)',
+--   synchronize_data := TRUE
+-- );
 
 -- pgsubscriber
 -- create subscriber node
@@ -115,7 +129,7 @@ SELECT pglogical.create_node(
 -- create subscription
 SELECT pglogical.create_subscription(
   subscription_name := 'subscription',
-  replication_sets := array['posts'],
+  replication_sets := array['example'],
   provider_dsn := 'host=pgprovider port=5432 dbname=pg_logical_replication user=postgres password=s3cr3t'
 );
 
@@ -127,7 +141,7 @@ SELECT * FROM pglogical.show_subscription_status(
 -- show subscription table
 SELECT * FROM pglogical.show_subscription_table(
   subscription_name := 'subscription',
-  relation := 'posts'
+  relation := 'example'
 );
 
 -- show `pglogical` relations
@@ -139,7 +153,7 @@ SELECT * FROM pglogical.show_subscription_table(
 -- show local sync status
 SELECT sync_status
   FROM pglogical.local_sync_status
-  WHERE sync_nspname = 'public' AND sync_relname = 'posts';
+  WHERE sync_nspname = 'public' AND sync_relname = 'example';
 
 -- show replication stats on provider
 SELECT
@@ -272,7 +286,7 @@ pg_logical_replication_results=# SELECT * FROM pglogical.local_sync_status;
 sync_kind      | f
 sync_subid     | 2875150205
 sync_nspname   | public
-sync_relname   | posts
+sync_relname   | example
 sync_status    | r
 sync_statuslsn | 0/1822758
 -[ RECORD 2 ]--+-----------
