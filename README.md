@@ -120,22 +120,19 @@ SELECT pglogical.create_replication_set(
 SELECT pglogical.replication_set_add_table(
   set_name := 'example',
   relation := 'users',
-  row_filter := 'id = 1',
-  synchronize_data := TRUE
+  row_filter := 'id = 1'
 );
 
 SELECT pglogical.replication_set_add_table(
   set_name := 'example',
   relation := 'posts',
-  row_filter := 'user_id = 1',
-  synchronize_data := TRUE
+  row_filter := 'user_id = 1'
 );
 
 SELECT pglogical.replication_set_add_table(
   set_name := 'example',
   relation := 'comments',
-  row_filter := 'user_id = 1',
-  synchronize_data := TRUE
+  row_filter := 'user_id = 1'
 );
 
 -- pgsubscriber
@@ -173,13 +170,6 @@ SELECT * FROM pglogical.show_subscription_table(
 SELECT sync_status
   FROM pglogical.local_sync_status
   WHERE sync_nspname = 'public' AND sync_relname = 'example';
-
--- show replication stats on provider
-SELECT
-  pg_current_wal_insert_lsn(),
-  replay_lsn,
-  pg_size_pretty(pg_current_wal_insert_lsn() - replay_lsn::pg_lsn) AS diff
-FROM pg_stat_replication;
 ```
 
 The sync states are defined [here](https://github.com/2ndQuadrant/pglogical/blob/REL2_x_STABLE/pglogical_sync.h#L43-L51) and mean the following:
