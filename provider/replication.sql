@@ -13,20 +13,17 @@ SELECT pglogical.create_replication_set(
 SELECT pglogical.replication_set_add_table(
   set_name := 'example',
   relation := 'users',
-  row_filter := 'id = 1',
-  synchronize_data := TRUE
+  row_filter := 'id = 1'
 );
 
 SELECT pglogical.replication_set_add_table(
   set_name := 'example',
   relation := 'posts',
-  row_filter := 'user_id = 1',
-  synchronize_data := TRUE
+  row_filter := 'user_id = 1'
 );
 
 SELECT pglogical.replication_set_add_table(
   set_name := 'example',
   relation := 'comments',
-  row_filter := 'user_id = 1',
-  synchronize_data := TRUE
+  row_filter := 'user_id = 1'
 );
