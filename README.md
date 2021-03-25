@@ -85,7 +85,7 @@ INSERT 0 1000
 
 docker exec -it pglogical-poc_pgprovider_1 \
   psql -U postgres -d pg_logical_replication \
-    -c 'INSERT INTO comments (SELECT generate_series(201, 400), FLOOR(random()*1000)+1);'
+    -c 'INSERT INTO comments (SELECT generate_series(201, 400), FLOOR(random()*1000)+1, 1, (ROUND(random())::int)::boolean);'
 INSERT 0 200
 
 docker exec -it pglogical-poc_pgprovider_1 \
