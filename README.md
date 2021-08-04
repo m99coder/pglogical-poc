@@ -278,6 +278,17 @@ sync_statuslsn | 0/0
 pg_logical_replication_results=# exit
 ```
 
+## Metrics
+
+To monitor the overall performance and the replications in particular [PostgreSQL Server Exporter](https://github.com/prometheus-community/postgres_exporter) is used to export metrics in the [Prometheus](https://prometheus.io/docs/prometheus/latest/installation/#using-docker) format. A valid example configuration file for Prometheus can be found [here](https://github.com/prometheus/prometheus/blob/release-2.28/config/testdata/conf.good.yml). The effective configuration file is [this](./prometheus.yaml) one.
+
+The following endpoints provide metrics respectively:
+
+* PostgreSQL Server Exporter: [http://localhost:9187/metrics](http://localhost:9187/metrics)
+* Prometheus: [http://localhost:9090/metrics](http://localhost:9090/metrics)
+
+After having setup the initial dataset, we can see some values for how many tuples have been inserted (`pg_stat_database_tup_inserted`) in this [graph](http://localhost:9090/graph?g0.expr=pg_stat_database_tup_inserted%7Bdatname%3D%22pg_logical_replication%22%7D&g0.tab=0&g0.stacked=0&g0.show_exemplars=0&g0.range_input=1h) as an example.
+
 ## Resources
 
 - [PostgreSQL and the logical replication](https://blog.raveland.org/post/postgresql_lr_en/)

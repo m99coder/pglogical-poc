@@ -7,6 +7,8 @@ services:
     volumes:
       - ./postgresql.conf:/usr/share/postgresql/11/postgresql.conf.sample
       - ./pg_hba.conf:/usr/share/postgresql/11/pg_hba.conf.sample
+    ports:
+      - 5432:5432
   pgsubscriber:
     build: ./subscriber
     depends_on:
@@ -16,3 +18,20 @@ services:
     volumes:
       - ./postgresql.conf:/usr/share/postgresql/11/postgresql.conf.sample
       - ./pg_hba.conf:/usr/share/postgresql/11/pg_hba.conf.sample
+    ports:
+      - 5433:5432
+  prometheus:
+    image: prom/prometheus:2.28.1
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - 9090:9090
+  pgexporter:
+    environment:
+      - DATA_SOURCE_NAME=postgresql://postgres:s3cr3t@pgprovider:5432?sslmode=disable,postgresql://postgres:s3cr3t@pgsubscriber:5432?sslmode=disable
+    image: wrouesnel/postgres_exporter
+    ports:
+      - 9187:9187
+    depends_on:
+      - pgprovider
+      - pgsubscriber
