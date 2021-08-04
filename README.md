@@ -291,6 +291,17 @@ After having setup the initial dataset, we can see some values for how many tupl
 
 <img src="./prometheus-graph.png" alt="Prometheus Graph" />
 
+## Convenience
+
+You can use the following `make` targets to simplify processes:
+
+- `build`: Build containers
+- `start`: Start containers while also rebuilding the images
+- `run`: Run replication as soon as databases are ready (depends on `start`)
+- `list`: List running containers
+- `stop`: Stop containers while also removing the images
+- `clean`: Remove containers
+
 ## Debugging
 
 For debugging purposes we can run a [Docker image](https://hub.docker.com/r/jbergknoff/postgresql-client) that only provides the `psql` client as follows:
