@@ -280,7 +280,7 @@ pg_logical_replication_results=# exit
 
 ## Metrics
 
-To monitor the overall performance and the replications in particular [PostgreSQL Server Exporter](https://github.com/prometheus-community/postgres_exporter) is used to export metrics in the [Prometheus](https://prometheus.io/docs/prometheus/latest/installation/#using-docker) format. A valid example configuration file for Prometheus can be found [here](https://github.com/prometheus/prometheus/blob/release-2.28/config/testdata/conf.good.yml). The effective configuration file is [this](./prometheus.yaml) one.
+To monitor the overall performance and the replications in particular [PostgreSQL Server Exporter](https://github.com/prometheus-community/postgres_exporter) is used to export metrics in the [Prometheus](https://prometheus.io/docs/prometheus/latest/installation/#using-docker) format. A valid example configuration file for Prometheus can be found [here](https://github.com/prometheus/prometheus/blob/release-2.28/config/testdata/conf.good.yml). The effective configuration file is [this](./prometheus.yml) one.
 
 The following endpoints provide metrics respectively:
 
