@@ -291,6 +291,16 @@ After having setup the initial dataset, we can see some values for how many tupl
 
 <img src="./prometheus-graph.png" alt="Prometheus Graph" />
 
+## Debugging
+
+For debugging purposes we can run a [Docker image](https://hub.docker.com/r/jbergknoff/postgresql-client) that only provides the `psql` client as follows:
+
+```bash
+$ # run `psql` within the same docker network and access `pgprovider`
+$ docker run -it --net pglogical-poc_default --rm jbergknoff/postgresql-client \
+    "postgresql://postgres:s3cr3t@pgprovider:5432?sslmode=disable"
+```
+
 ## Resources
 
 - [PostgreSQL and the logical replication](https://blog.raveland.org/post/postgresql_lr_en/)

@@ -75,7 +75,7 @@ custom_pg_stat_replication:
       replay_lsn,
       pg_current_wal_insert_lsn() AS insert_lsn,
       sync_state,
-      pg_size_pretty(pg_current_wal_insert_lsn() - replay_lsn::pg_lsn) AS diff
+      pg_current_wal_insert_lsn() - replay_lsn::pg_lsn AS diff
     FROM pg_stat_replication
   metrics:
     - application_name:
