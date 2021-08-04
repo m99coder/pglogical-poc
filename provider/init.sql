@@ -31,3 +31,9 @@ WHERE comments.id = subquery.id;
 
 -- create extension
 CREATE EXTENSION pglogical;
+
+-- create node
+SELECT pglogical.create_node(
+  node_name := 'provider',
+  dsn := 'host=pgprovider port=5432 dbname=pg_logical_replication'
+);

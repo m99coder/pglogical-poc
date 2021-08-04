@@ -1,4 +1,4 @@
--- create subscriber node
+-- create node
 SELECT pglogical.create_node(
   node_name := 'subscriber',
   dsn := 'host=pgsubscriber port=5432 dbname=pg_logical_replication_results user=postgres password=s3cr3t'

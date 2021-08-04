@@ -101,54 +101,9 @@ WHERE comments.id = subquery.id;'
 UPDATE 400
 ```
 
-SQL queries as plain text for convenience:
+Some useful SQL queries:
 
 ```sql
--- pgprovider
--- create node
-SELECT pglogical.create_node(
-  node_name := 'provider',
-  dsn := 'host=pgprovider port=5432 dbname=pg_logical_replication user=postgres password=s3cr3t'
-);
-
--- create replication set
-SELECT pglogical.create_replication_set(
-  set_name := 'example'
-);
-
--- add tables to replication set
-SELECT pglogical.replication_set_add_table(
-  set_name := 'example',
-  relation := 'users',
-  row_filter := 'id = 1'
-);
-
-SELECT pglogical.replication_set_add_table(
-  set_name := 'example',
-  relation := 'posts',
-  row_filter := 'user_id = 1'
-);
-
-SELECT pglogical.replication_set_add_table(
-  set_name := 'example',
-  relation := 'comments',
-  row_filter := 'user_id = 1'
-);
-
--- pgsubscriber
--- create subscriber node
-SELECT pglogical.create_node(
-  node_name := 'subscriber',
-  dsn := 'host=pgsubscriber port=5432 dbname=pg_logical_replication_results user=postgres password=s3cr3t'
-);
-
--- create subscription
-SELECT pglogical.create_subscription(
-  subscription_name := 'subscription',
-  replication_sets := array['example'],
-  provider_dsn := 'host=pgprovider port=5432 dbname=pg_logical_replication user=postgres password=s3cr3t'
-);
-
 -- show subscription status
 SELECT * FROM pglogical.show_subscription_status(
   subscription_name := 'subscription'
@@ -295,10 +250,24 @@ pg_logical_replication_results=# SELECT * FROM pglogical.local_sync_status;
 sync_kind      | f
 sync_subid     | 2875150205
 sync_nspname   | public
-sync_relname   | example
+sync_relname   | users
 sync_status    | r
-sync_statuslsn | 0/1822758
+sync_statuslsn | 0/183A6D8
 -[ RECORD 2 ]--+-----------
+sync_kind      | f
+sync_subid     | 2875150205
+sync_nspname   | public
+sync_relname   | posts
+sync_status    | r
+sync_statuslsn | 0/183A6D8
+-[ RECORD 3 ]--+-----------
+sync_kind      | f
+sync_subid     | 2875150205
+sync_nspname   | public
+sync_relname   | comments
+sync_status    | r
+sync_statuslsn | 0/183A6D8
+-[ RECORD 4 ]--+-----------
 sync_kind      | d
 sync_subid     | 2875150205
 sync_nspname   |

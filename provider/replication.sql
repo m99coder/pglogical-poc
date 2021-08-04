@@ -1,9 +1,3 @@
--- create node
-SELECT pglogical.create_node(
-  node_name := 'provider',
-  dsn := 'host=pgprovider port=5432 dbname=pg_logical_replication user=postgres password=s3cr3t'
-);
-
 -- create replication set
 SELECT pglogical.create_replication_set(
   set_name := 'example'
