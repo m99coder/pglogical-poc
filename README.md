@@ -289,7 +289,7 @@ The following endpoints provide metrics respectively:
 
 After having setup the initial dataset, we can see some values for how many tuples have been inserted (`pg_stat_database_tup_inserted`) in this [graph](http://localhost:9090/graph?g0.expr=pg_stat_database_tup_inserted%7Bdatname%3D%22pg_logical_replication%22%7D&g0.tab=0&g0.stacked=0&g0.show_exemplars=0&g0.range_input=1h) as an example.
 
-<img src="./prometheus-graph.png" width="600" alt="Prometheus Graph" />
+<img src="./prometheus-graph.png" alt="Prometheus Graph" />
 
 ## Resources
 
