@@ -19,6 +19,8 @@ start: ## Start containers.
 	docker-compose up -d --build
 
 run: start ## Run replication.
+	timeout 90s bash -c "until docker exec pglogical-poc_pgprovider_1 pg_isready ; do sleep 5 ; done"
+	timeout 90s bash -c "until docker exec pglogical-poc_pgsubscriber_1 pg_isready ; do sleep 5 ; done"
 	docker exec -it pglogical-poc_pgprovider_1 \
 		psql -U postgres -d pg_logical_replication -f /replication.sql
 	docker exec -it pglogical-poc_pgsubscriber_1 \
