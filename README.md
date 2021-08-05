@@ -291,6 +291,8 @@ After having setup the initial dataset, we can see some values for how many tupl
 
 <img src="./prometheus-graph.png" alt="Prometheus Graph" />
 
+The mappings into the Prometheus format provided by _PostgreSQL Server Exporter_ can be found [here](https://github.com/prometheus-community/postgres_exporter/blob/v0.10.0/cmd/postgres_exporter/postgres_exporter.go#L165-L310) and the default custom queries added can be found [here](https://github.com/prometheus-community/postgres_exporter/blob/v0.10.0/cmd/postgres_exporter/queries.go#L46-L174). If you don’t want to see the default metrics, set the environment variable `PG_EXPORTER_DISABLE_DEFAULT_METRICS` to `true`.
+
 ## Convenience
 
 You can use the following `make` targets to simplify processes:
