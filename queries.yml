@@ -1,4 +1,4 @@
-custom_pg_replication:
+pglogical_pg_replication:
   query: |
     SELECT
       CASE WHEN NOT pg_is_in_recovery()
@@ -8,76 +8,105 @@ custom_pg_replication:
   metrics:
     - lag:
         usage: "GAUGE"
-        description: "Replication lag behind master in seconds"
+        description: "Replication lag behind leader in seconds"
 
-custom_pg_replication_slot:
+pglogical_pg_stat_replication:
   query: |
     SELECT
-      slot_name,
-      slot_type,
-      active,
-      confirmed_flush_lsn
+      pid,
+      application_name,
+      EXTRACT(EPOCH FROM backend_start) AS backend_start,
+      state,
+      sent_lsn,
+      sent_lsn - '0/00000000'::pg_lsn AS sent_lsn_numeric,
+      write_lsn,
+      write_lsn - '0/00000000'::pg_lsn AS write_lsn_numeric,
+      flush_lsn,
+      flush_lsn - '0/00000000'::pg_lsn AS flush_lsn_numeric,
+      replay_lsn,
+      replay_lsn - '0/00000000'::pg_lsn AS replay_lsn_numeric,
+      COALESCE(EXTRACT(EPOCH FROM write_lag), 0) AS write_lag,
+      COALESCE(EXTRACT(EPOCH FROM flush_lag), 0) AS flush_lag,
+      COALESCE(EXTRACT(EPOCH FROM replay_lag), 0) AS replay_lag
+    FROM pg_stat_replication
+  metrics:
+    - pid:
+        usage: "LABEL"
+        description: "Process ID of a WAL sender process"
+    - application_name:
+        usage: "LABEL"
+        description: "Name of the application that is connected to this WAL sender"
+    - backend_start:
+        usage: "COUNTER"
+        description: "Time when client connected to WAL sender"
+    - state:
+        usage: "LABEL"
+        description: "Current WAL sender state"
+    - sent_lsn:
+        usage: "LABEL"
+        description: "Last write-ahead log location sent on this connection"
+    - sent_lsn_numeric:
+        usage: "COUNTER"
+        description: "Last write-ahead log location sent on this connection (as number)"
+    - write_lsn:
+        usage: "LABEL"
+        description: "Last write-ahead log location written to disk by this standby server"
+    - write_lsn_numeric:
+        usage: "COUNTER"
+        description: "Last write-ahead log location written to disk by this standby server (as number)"
+    - flush_lsn:
+        usage: "LABEL"
+        description: "Last write-ahead log location flushed to disk by this standby server"
+    - flush_lsn_numeric:
+        usage: "COUNTER"
+        description: "Last write-ahead log location flushed to disk by this standby server (as number)"
+    - replay_lsn:
+        usage: "LABEL"
+        description: "Last write-ahead log location replayed into the database on this standby server"
+    - replay_lsn_numeric:
+        usage: "COUNTER"
+        description: "Last write-ahead log location replayed into the database on this standby server (as number)"
+    - write_lag:
+        usage: "GAUGE"
+        description: "Time elapsed between flushing recent WAL locally and receiving notification that this standby server has written it"
+    - flush_lag:
+        usage: "GAUGE"
+        description: "Time elapsed between flushing recent WAL locally and receiving notification that this standby server has written and flushed it"
+    - replay_lag:
+        usage: "GAUGE"
+        description: "Time elapsed between flushing recent WAL locally and receiving notification that this standby server has written, flushed and applied it"
+
+pglogical_pg_replication_slots:
+  query: |
+    SELECT
+      pg_replication_slots.slot_name,
+      pg_replication_slots.database,
+      pg_replication_slots.active,
+      pg_replication_slots.active_pid,
+      pg_replication_slots.confirmed_flush_lsn,
+      pg_replication_slots.confirmed_flush_lsn - '0/00000000'::pg_lsn AS confirmed_flush_lsn_numeric,
+      pg_stat_replication.application_name
     FROM pg_replication_slots
+    INNER JOIN pg_stat_replication ON pg_replication_slots.active_pid = pg_stat_replication.pid
   metrics:
     - slot_name:
         usage: "LABEL"
-        description: "Name of the replication slot"
-    - slot_type:
+        description: "A unique, cluster-wide identifier for the replication slot"
+    - database:
         usage: "LABEL"
-        description: "Type of the replication slot"
+        description: "The name of the database this slot is associated with, or null"
     - active:
         usage: "COUNTER"
-        description: "Active flag of the replication slot"
+        description: "True if this slot is currently actively being used"
+    - active_pid:
+        usage: "LABEL"
+        description: "The process ID of the session using this slot if the slot is currently actively being used"
     - confirmed_flush_lsn:
         usage: "LABEL"
-        description: "Confirmed flush LSN"
-
-custom_pg_stat_replication:
-  query: |
-    SELECT
-      application_name,
-      client_addr,
-      backend_start,
-      state,
-      sent_lsn,
-      write_lsn,
-      flush_lsn,
-      replay_lsn,
-      pg_current_wal_insert_lsn() AS insert_lsn,
-      sync_state,
-      pg_current_wal_insert_lsn() - replay_lsn::pg_lsn AS diff
-    FROM pg_stat_replication
-  metrics:
+        description: "The address (LSN) up to which the logical slot’s consumer has confirmed receiving data"
+    - confirmed_flush_lsn_numeric:
+        usage: "COUNTER"
+        description: "The address (LSN) up to which the logical slot’s consumer has confirmed receiving data (as number)"
     - application_name:
         usage: "LABEL"
-        description: "Name of replication"
-    - client_addr:
-        usage: "LABEL"
-        description: "Target address of replication"
-    - backend_start:
-        usage: "LABEL"
-        description: "Start time of replication"
-    - state:
-        usage: "LABEL"
-        description: "State of replication"
-    - sent_lsn:
-        usage: "LABEL"
-        description: "Sent LSN of replication"
-    - write_lsn:
-        usage: "LABEL"
-        description: "Write LSN of replication"
-    - flush_lsn:
-        usage: "LABEL"
-        description: "Flush LSN of replication"
-    - replay_lsn:
-        usage: "LABEL"
-        description: "Replay LSN of replication"
-    - insert_lsn:
-        usage: "LABEL"
-        description: "Current WAL insert LSN"
-    - sync_state:
-        usage: "LABEL"
-        description: "Sync state of replication"
-    - diff:
-        usage: "COUNTER"
-        description: "Lag of replication in bytes"
+        description: "Name of the application that is connected to this WAL sender"

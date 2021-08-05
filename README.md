@@ -106,12 +106,12 @@ Some useful SQL queries:
 ```sql
 -- show subscription status
 SELECT * FROM pglogical.show_subscription_status(
-  subscription_name := 'subscription'
+  subscription_name := 'pglogical_subscription'
 );
 
 -- show subscription table
 SELECT * FROM pglogical.show_subscription_table(
-  subscription_name := 'subscription',
+  subscription_name := 'pglogical_subscription',
   relation := 'example'
 );
 
@@ -151,8 +151,8 @@ Type "help" for help.
 pg_logical_replication=# \x
 Expanded display is on.
 pg_logical_replication=# SELECT * FROM pg_replication_slots;
--[ RECORD 1 ]-------+------------------------------------------
-slot_name           | pgl_pg_logic194f0de_provider_subscription
+-[ RECORD 1 ]-------+----------------------------------------------------
+slot_name           | pgl_pg_logic194f0de_provider_pglogical_subscription
 plugin              | pglogical_output
 slot_type           | logical
 datoid              | 16384
@@ -200,7 +200,7 @@ pg_logical_replication=# SELECT * FROM pg_stat_replication;
 pid              | 101
 usesysid         | 10
 usename          | postgres
-application_name | subscription
+application_name | pglogical_subscription
 client_addr      | 192.168.128.3
 client_hostname  |
 client_port      | 58410
