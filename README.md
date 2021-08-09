@@ -289,9 +289,11 @@ The following endpoints provide metrics respectively:
 
 After having setup the initial dataset, we can see some values for how many tuples have been inserted (`pg_stat_database_tup_inserted`) in this [graph](http://localhost:9090/graph?g0.expr=pg_stat_database_tup_inserted%7Bdatname%3D%22pg_logical_replication%22%7D&g0.tab=0&g0.stacked=0&g0.show_exemplars=0&g0.range_input=1h) as an example.
 
-<img src="./prometheus-graph.png" alt="Prometheus Graph" />
-
 The mappings into the Prometheus format provided by _PostgreSQL Server Exporter_ can be found [here](https://github.com/prometheus-community/postgres_exporter/blob/v0.10.0/cmd/postgres_exporter/postgres_exporter.go#L165-L310) and the default custom queries added can be found [here](https://github.com/prometheus-community/postgres_exporter/blob/v0.10.0/cmd/postgres_exporter/queries.go#L46-L174). If you don’t want to see the default metrics, set the environment variable `PG_EXPORTER_DISABLE_DEFAULT_METRICS` to `true`.
+
+## Monitoring
+
+In conjunction with _Prometheus_, _Grafana_ can be used to monitor a whole bunch of different metrics provided by a variety of data sources. The default credentials for _Grafana_ are `admin:admin`. If you run `make grafana` (or `make run`) at least once, you are free to login into Grafana using [http://localhost:3000](http://localhost:3000) and change the default password. The script that sets _Grafana_ up creates an API token to configure _Prometheus_ as data source and also installs a couple of dashboards automatically.
 
 ## Convenience
 
@@ -299,7 +301,9 @@ You can use the following `make` targets to simplify processes:
 
 - `build`: Build containers
 - `start`: Start containers while also rebuilding the images
-- `run`: Run replication as soon as databases are ready (depends on `start`)
+- `grafana`: Setup Grafana with Prometheus as data source and some dashboards
+- `replicate`: Run replication
+- `run`: Runs `start`, `grafana` and `replicate`
 - `list`: List running containers
 - `stop`: Stop containers while also removing the images
 - `clean`: Remove containers
