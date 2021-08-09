@@ -39,3 +39,9 @@ services:
     depends_on:
       - pgprovider
       - pgsubscriber
+  grafana:
+    image: grafana/grafana:8.1.0
+    ports:
+      - 3000:3000
+    depends_on:
+      - prometheus

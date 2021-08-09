@@ -10,7 +10,7 @@
 # http://linuxcommand.org/lc3_adv_awk.php
 
 help: ## Display this help.
-	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_0-9-]+:.*?##/ { printf "  \033[36m%-7s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
+	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_0-9-]+:.*?##/ { printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
 build: ## Build containers.
 	docker-compose build --force-rm --parallel --pull
@@ -18,7 +18,11 @@ build: ## Build containers.
 start: ## Start containers.
 	docker-compose up -d --build
 
-run: start ## Run replication.
+grafana: ## Setup Grafana.
+	timeout 90s bash -c "until docker logs pglogical-poc_grafana_1 | grep 'HTTP Server Listen' ; do sleep 5 ; done"
+	./scripts/grafana-setup.sh
+
+replicate: ## Run replication.
 	timeout 90s bash -c "until docker exec pglogical-poc_pgprovider_1 pg_isready ; do sleep 5 ; done"
 	timeout 90s bash -c "until docker exec pglogical-poc_pgsubscriber_1 pg_isready ; do sleep 5 ; done"
 	docker exec -it pglogical-poc_pgprovider_1 \
@@ -34,6 +38,8 @@ run: start ## Run replication.
 	docker exec -it pglogical-poc_pgprovider_1 \
 		psql -U postgres -d pg_logical_replication \
 			-c 'UPDATE comments SET user_id = subquery.user_id FROM (SELECT posts.user_id, comments.id FROM posts INNER JOIN comments ON posts.id = comments.post_id) AS subquery WHERE comments.id = subquery.id;'
+
+run: start grafana replicate ## Start containers, setup Grafana and run replication.
 
 list: # List running containers.
 	docker-compose ps

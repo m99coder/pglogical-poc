@@ -17,13 +17,9 @@ pglogical_pg_stat_replication:
       application_name,
       EXTRACT(EPOCH FROM backend_start) AS backend_start,
       state,
-      sent_lsn,
       sent_lsn - '0/00000000'::pg_lsn AS sent_lsn_numeric,
-      write_lsn,
       write_lsn - '0/00000000'::pg_lsn AS write_lsn_numeric,
-      flush_lsn,
       flush_lsn - '0/00000000'::pg_lsn AS flush_lsn_numeric,
-      replay_lsn,
       replay_lsn - '0/00000000'::pg_lsn AS replay_lsn_numeric,
       COALESCE(EXTRACT(EPOCH FROM write_lag), 0) AS write_lag,
       COALESCE(EXTRACT(EPOCH FROM flush_lag), 0) AS flush_lag,
@@ -42,27 +38,15 @@ pglogical_pg_stat_replication:
     - state:
         usage: "LABEL"
         description: "Current WAL sender state"
-    - sent_lsn:
-        usage: "LABEL"
-        description: "Last write-ahead log location sent on this connection"
     - sent_lsn_numeric:
         usage: "COUNTER"
         description: "Last write-ahead log location sent on this connection (as number)"
-    - write_lsn:
-        usage: "LABEL"
-        description: "Last write-ahead log location written to disk by this standby server"
     - write_lsn_numeric:
         usage: "COUNTER"
         description: "Last write-ahead log location written to disk by this standby server (as number)"
-    - flush_lsn:
-        usage: "LABEL"
-        description: "Last write-ahead log location flushed to disk by this standby server"
     - flush_lsn_numeric:
         usage: "COUNTER"
         description: "Last write-ahead log location flushed to disk by this standby server (as number)"
-    - replay_lsn:
-        usage: "LABEL"
-        description: "Last write-ahead log location replayed into the database on this standby server"
     - replay_lsn_numeric:
         usage: "COUNTER"
         description: "Last write-ahead log location replayed into the database on this standby server (as number)"
@@ -82,8 +66,7 @@ pglogical_pg_replication_slots:
       pg_replication_slots.slot_name,
       pg_replication_slots.database,
       pg_replication_slots.active,
-      pg_replication_slots.active_pid,
-      pg_replication_slots.confirmed_flush_lsn,
+      pg_replication_slots.active_pid AS pid,
       pg_replication_slots.confirmed_flush_lsn - '0/00000000'::pg_lsn AS confirmed_flush_lsn_numeric,
       pg_stat_replication.application_name
     FROM pg_replication_slots
@@ -101,9 +84,6 @@ pglogical_pg_replication_slots:
     - active_pid:
         usage: "LABEL"
         description: "The process ID of the session using this slot if the slot is currently actively being used"
-    - confirmed_flush_lsn:
-        usage: "LABEL"
-        description: "The address (LSN) up to which the logical slot’s consumer has confirmed receiving data"
     - confirmed_flush_lsn_numeric:
         usage: "COUNTER"
         description: "The address (LSN) up to which the logical slot’s consumer has confirmed receiving data (as number)"
