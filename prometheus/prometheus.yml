@@ -2,6 +2,7 @@ global:
   scrape_interval: 15s
   scrape_timeout: 10s
   evaluation_interval: 15s
+
 alerting:
   alertmanagers:
   - follow_redirects: true
@@ -10,18 +11,12 @@ alerting:
     api_version: v2
     static_configs:
     - targets: []
+
+rule_files:
+  - alerting-rules.yml
+
 scrape_configs:
-- job_name: prometheus
-  honor_timestamps: true
-  scrape_interval: 15s
-  scrape_timeout: 10s
-  metrics_path: /metrics
-  scheme: http
-  follow_redirects: true
-  static_configs:
-  - targets:
-    - localhost:9090
-- job_name: pgexporter
+- job_name: postgres
   static_configs:
   - targets:
     - pgexporter:9187

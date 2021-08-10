@@ -278,9 +278,9 @@ sync_statuslsn | 0/0
 pg_logical_replication_results=# exit
 ```
 
-## Metrics
+## Metrics & Alerting
 
-To monitor the overall performance and the replications in particular [PostgreSQL Server Exporter](https://github.com/prometheus-community/postgres_exporter) is used to export metrics in the [Prometheus](https://prometheus.io/docs/prometheus/latest/installation/#using-docker) format. A valid example configuration file for Prometheus can be found [here](https://github.com/prometheus/prometheus/blob/release-2.28/config/testdata/conf.good.yml). The effective configuration file is [this](./prometheus.yml) one.
+To monitor the overall performance and the replications in particular [PostgreSQL Server Exporter](https://github.com/prometheus-community/postgres_exporter) is used to export metrics in the [Prometheus](https://prometheus.io/docs/prometheus/latest/installation/#using-docker) format. A valid example configuration file for Prometheus can be found [here](https://github.com/prometheus/prometheus/blob/release-2.28/config/testdata/conf.good.yml). The effective configuration file is [this](./prometheus/prometheus.yml) one.
 
 The following endpoints provide metrics respectively:
 
@@ -291,6 +291,17 @@ After having setup the initial dataset, we can see some values for how many tupl
 
 The mappings into the Prometheus format provided by _PostgreSQL Server Exporter_ can be found [here](https://github.com/prometheus-community/postgres_exporter/blob/v0.10.0/cmd/postgres_exporter/postgres_exporter.go#L165-L310) and the default custom queries added can be found [here](https://github.com/prometheus-community/postgres_exporter/blob/v0.10.0/cmd/postgres_exporter/queries.go#L46-L174). If you don’t want to see the default metrics, set the environment variable `PG_EXPORTER_DISABLE_DEFAULT_METRICS` to `true`.
 
+_Prometheus_ will be configured with some example alerts:
+
+* `PostgreSQLMaxConnectionsReached`
+* `PostgreSQLHighConnections`
+* `PostgreSQLDown`
+* `PostgreSQLSlowQueries`
+* `PostgreSQLQPS`
+* `PostgreSQLCacheHitRatio`
+
+Their definition can be found [here](./prometheus/alerting-rules.yml).
+
 ## Monitoring
 
 In conjunction with _Prometheus_, _Grafana_ can be used to monitor a whole bunch of different metrics provided by a variety of data sources. The custom credentials for _Grafana_ are `admin:s3cr3t`. Provisioning capabilities are used to configure _Prometheus_ as data source and also already create a useful [dashboard](https://grafana.com/grafana/dashboards/14114).
@@ -300,12 +311,11 @@ In conjunction with _Prometheus_, _Grafana_ can be used to monitor a whole bunch
 You can use the following `make` targets to simplify processes:
 
 - `build`: Build containers
-- `start`: Start containers while also rebuilding the images
-- `grafana`: Setup Grafana with Prometheus as data source and some dashboards
+- `start`: Start containers
 - `replicate`: Run replication
-- `run`: Runs `start`, `grafana` and `replicate`
+- `run`: Runs `start` and `replicate`
 - `list`: List running containers
-- `stop`: Stop containers while also removing the images
+- `stop`: Stop containers
 - `clean`: Remove containers
 
 ## Debugging
@@ -320,6 +330,8 @@ $ docker run -it --net pglogical-poc_default --rm jbergknoff/postgresql-client \
 
 ## Resources
 
+**Postgres**
+
 - [PostgreSQL and the logical replication](https://blog.raveland.org/post/postgresql_lr_en/)
 - [PostgreSQL replication with Docker](https://medium.com/swlh/postgresql-replication-with-docker-c6a904becf77)
 - [Dockerfile](https://gist.github.com/asaaki/b07dccfd6ff6eed4c7b4ef279ade7b0c)
@@ -330,3 +342,9 @@ $ docker run -it --net pglogical-poc_default --rm jbergknoff/postgresql-client \
 - [How to configure pglogical](https://www.tutorialdba.com/2018/01/how-to-configure-pglogical-streaming.html)
 - [PostgreSQL – logical replication with pglogical](https://blog.dbi-services.com/postgresql-logical-replication-with-pglogical/)
 - [PG Phriday: Perfectly Logical](http://bonesmoses.org/2016/10/14/pg-phriday-perfectly-logical/)
+
+**Grafana**
+
+- [Provisioning Grafana Datasources and Dashboards Automagically](https://blog.56k.cloud/provisioning-grafana-datasources-and-dashboards-automagically/)
+- [PostgreSQL Exporter Quickstart and Dashboard](https://grafana.com/grafana/dashboards/14114)
+- [Grafana Open Source: Postgres Exporter](https://grafana.com/oss/prometheus/exporters/postgres-exporter/)

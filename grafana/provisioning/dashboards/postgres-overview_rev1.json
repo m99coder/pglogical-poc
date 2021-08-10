@@ -1341,8 +1341,8 @@
         "allValue": null,
         "current": {
           "selected": true,
-          "text": "pgexporter",
-          "value": "pgexporter"
+          "text": "postgres",
+          "value": "postgres"
         },
         "datasource": "$datasource",
         "definition": "label_values(pg_up, job)",
