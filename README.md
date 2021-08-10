@@ -333,22 +333,22 @@ tps = 493.777011 (excluding connections establishing)
 
 ## Replication
 
-We are aiming to utilize _pgbench_ for our replication example. A good candidate is the `pgbench_history` table, that is holding almost 15k records per teller and there have been 10 different tellers created. One caveat exist: This table doesn’t have a primary key, so we can only replicate `INSERT` statements. For this example it’s sufficient, though.
+We are aiming to utilize _pgbench_ for our replication example. A good candidate is the `pgbench_history` table, that is holding almost ~2.4k records per teller (after running `pgbench`) and there have been 10 different tellers created. One caveat exist: This table doesn’t have a primary key, so we can only replicate `INSERT` statements. For this example it’s sufficient, though.
 
 ```sql
 pg_logical_replication=# SELECT tid, COUNT(tid) FROM pgbench_history GROUP BY tid;
  tid | count
 -----+-------
-   8 | 14543
-   7 | 14918
-   9 | 14754
-  10 | 14778
-   1 | 14765
-   5 | 14897
-   4 | 14942
-   2 | 14865
-   6 | 14823
-   3 | 14856
+   8 |  2399
+  10 |  2467
+   7 |  2369
+   9 |  2393
+   1 |  2426
+   5 |  2371
+   4 |  2398
+   2 |  2400
+   6 |  2297
+   3 |  2386
 (10 rows)
 ```
 
