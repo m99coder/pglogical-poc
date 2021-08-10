@@ -18,10 +18,6 @@ build: ## Build containers.
 start: ## Start containers.
 	docker-compose up -d --build
 
-grafana: ## Setup Grafana.
-	timeout 90s bash -c "until docker logs pglogical-poc_grafana_1 | grep 'HTTP Server Listen' ; do sleep 5 ; done"
-	./scripts/grafana-setup.sh
-
 replicate: ## Run replication.
 	timeout 90s bash -c "until docker exec pglogical-poc_pgprovider_1 pg_isready ; do sleep 5 ; done"
 	timeout 90s bash -c "until docker exec pglogical-poc_pgsubscriber_1 pg_isready ; do sleep 5 ; done"
@@ -39,7 +35,7 @@ replicate: ## Run replication.
 		psql -U postgres -d pg_logical_replication \
 			-c 'UPDATE comments SET user_id = subquery.user_id FROM (SELECT posts.user_id, comments.id FROM posts INNER JOIN comments ON posts.id = comments.post_id) AS subquery WHERE comments.id = subquery.id;'
 
-run: start grafana replicate ## Start containers, setup Grafana and run replication.
+run: start replicate ## Start containers, setup Grafana and run replication.
 
 list: # List running containers.
 	docker-compose ps

@@ -293,7 +293,7 @@ The mappings into the Prometheus format provided by _PostgreSQL Server Exporter_
 
 ## Monitoring
 
-In conjunction with _Prometheus_, _Grafana_ can be used to monitor a whole bunch of different metrics provided by a variety of data sources. The default credentials for _Grafana_ are `admin:admin`. If you run `make grafana` (or `make run`) at least once, you are free to login into Grafana using [http://localhost:3000](http://localhost:3000) and change the default password. The script that sets _Grafana_ up creates an API token to configure _Prometheus_ as data source and also installs a couple of dashboards automatically.
+In conjunction with _Prometheus_, _Grafana_ can be used to monitor a whole bunch of different metrics provided by a variety of data sources. The custom credentials for _Grafana_ are `admin:s3cr3t`. Provisioning capabilities are used to configure _Prometheus_ as data source and also already create a useful [dashboard](https://grafana.com/grafana/dashboards/14114).
 
 ## Convenience
 
