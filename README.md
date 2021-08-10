@@ -306,14 +306,84 @@ Their definition can be found [here](./prometheus/alerting-rules.yml).
 
 In conjunction with _Prometheus_, _Grafana_ can be used to monitor a whole bunch of different metrics provided by a variety of data sources. The custom credentials for _Grafana_ are `admin:s3cr3t`. Provisioning capabilities are used to configure _Prometheus_ as data source and also already create a useful [dashboard](https://grafana.com/grafana/dashboards/14114).
 
+## Benchmarking
+
+[pgbench](https://www.postgresql.org/docs/11/pgbench.html) can be used to perform a benchmark. This is a 2-step process. First you need to initialize the database and then you can run the benchmark itself.
+
+```bash
+$ # init pgbench by creating the necessary tables
+$ docker exec -it pglogical-poc_pgprovider_1 \
+    pgbench -U postgres -d pg_logical_replication -i
+
+$ # run pgbench
+$ docker exec -it pglogical-poc_pgprovider_1 \
+    pgbench -U postgres -d pg_logical_replication -c 10 -T 300
+# ...
+transaction type: <builtin: TPC-B (sort of)>
+scaling factor: 1
+query mode: simple
+number of clients: 10
+number of threads: 1
+duration: 300 s
+number of transactions actually processed: 148141
+latency average = 20.252 ms
+tps = 493.772765 (including connections establishing)
+tps = 493.777011 (excluding connections establishing)
+```
+
+## Replication
+
+We are aiming to utilize _pgbench_ for our replication example. A good candidate is the `pgbench_history` table, that is holding almost 15k records per teller and there have been 10 different tellers created. One caveat exist: This table doesn’t have a primary key, so we can only replicate `INSERT` statements. For this example it’s sufficient, though.
+
+```sql
+pg_logical_replication=# SELECT tid, COUNT(tid) FROM pgbench_history GROUP BY tid;
+ tid | count
+-----+-------
+   8 | 14543
+   7 | 14918
+   9 | 14754
+  10 | 14778
+   1 | 14765
+   5 | 14897
+   4 | 14942
+   2 | 14865
+   6 | 14823
+   3 | 14856
+(10 rows)
+```
+
+After having leveraged `make start init replicate` (or for short `make run`), we can check if the `pgbench_history` table in `pgsubscriber` is filled.
+
+```bash
+# count on provider side
+docker exec -it pglogical-poc_pgprovider_1 \
+  psql -U postgres -d pg_logical_replication \
+    -c 'SELECT COUNT(*) FROM pgbench_history WHERE tid = 1;'
+ count
+-------
+  2631
+(1 row)
+
+# count on subscriber side
+docker exec -it pglogical-poc_pgsubscriber_1 \
+  psql -U postgres -d pg_logical_replication_results \
+    -c 'SELECT COUNT(*) FROM pgbench_history WHERE tid = 1;'
+ count
+-------
+  2631
+(1 row)
+```
+
 ## Convenience
 
 You can use the following `make` targets to simplify processes:
 
 - `build`: Build containers
 - `start`: Start containers
+- `wait`: Wait for databases to be ready
+- `init`: Wait for databases to be ready
 - `replicate`: Run replication
-- `run`: Runs `start` and `replicate`
+- `run`: Runs `start`, `init` and `replicate`
 - `list`: List running containers
 - `stop`: Stop containers
 - `clean`: Remove containers
