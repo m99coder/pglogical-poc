@@ -90,3 +90,89 @@ pglogical_pg_replication_slots:
     - application_name:
         usage: "LABEL"
         description: "Name of the application that is connected to this WAL sender"
+
+pglogical_local_sync_status:
+  query: |
+    SELECT
+      pglogical.subscription.sub_id,
+      pglogical.subscription.sub_origin,
+      n1.node_name AS sub_origin_node_name,
+      pglogical.subscription.sub_target,
+      n2.node_name AS sub_target_node_name,
+      pglogical.subscription.sub_enabled,
+      pglogical.subscription.sub_slot_name,
+      pglogical.subscription.sub_replication_sets,
+      CASE
+        WHEN sync_kind = 'i' THEN 'SYNC_KIND_INIT'
+        WHEN sync_kind = 'f' THEN 'SYNC_KIND_FULL'
+        WHEN sync_kind = 's' THEN 'SYNC_KIND_STRUCTURE'
+        WHEN sync_kind = 'd' THEN 'SYNC_KIND_DATA'
+        ELSE 'UNKNOWN'
+      END AS sync_kind,
+      sync_nspname,
+      sync_relname,
+      CASE
+        WHEN sync_status = '\0' THEN 'SYNC_STATUS_NONE'
+        WHEN sync_status = 'i' THEN 'SYNC_STATUS_INIT'
+        WHEN sync_status = 's' THEN 'SYNC_STATUS_STRUCTURE'
+        WHEN sync_status = 'd' THEN 'SYNC_STATUS_DATA'
+        WHEN sync_status = 'c' THEN 'SYNC_STATUS_CONSTRAINTS'
+        WHEN sync_status = 'w' THEN 'SYNC_STATUS_SYNCWAIT'
+        WHEN sync_status = 'u' THEN 'SYNC_STATUS_CATCHUP'
+        WHEN sync_status = 'y' THEN 'SYNC_STATUS_SYNCDONE'
+        WHEN sync_status = 'r' THEN 'SYNC_STATUS_READY'
+        ELSE 'UNKNOWN'
+      END AS sync_status,
+      sync_statuslsn AS sync_status_lsn,
+      sync_statuslsn - '0/00000000'::pg_lsn AS sync_status_lsn_numeric
+    FROM pglogical.local_sync_status
+    INNER JOIN pglogical.subscription
+      ON pglogical.local_sync_status.sync_subid = pglogical.subscription.sub_id
+    INNER JOIN pglogical.node n1
+      ON pglogical.subscription.sub_origin = n1.node_id
+    INNER JOIN pglogical.node n2
+      ON pglogical.subscription.sub_target = n2.node_id
+    WHERE sync_nspname IS NOT NULL AND sync_relname IS NOT NULL
+  metrics:
+    - sub_id:
+        usage: "LABEL"
+        description: "ID of subscription"
+    - sub_origin:
+        usage: "LABEL"
+        description: "Node ID of subscription source"
+    - sub_origin_node_name:
+        usage: "LABEL"
+        description: "Node name of subscription source"
+    - sub_target:
+        usage: "LABEL"
+        description: "Node ID of subscription target"
+    - sub_target_node_name:
+        usage: "LABEL"
+        description: "Node name of subscription target"
+    - sub_enabled:
+        usage: "LABEL"
+        description: "True if this subscription is currently enabled"
+    - sub_slot_name:
+        usage: "LABEL"
+        description: "Slot name used by subscription"
+    - sub_replication_sets:
+        usage: "LABEL"
+        description: "Replication sets attached to subscription"
+    - sync_kind:
+        usage: "LABEL"
+        description: "Kind of synchronization"
+    - sync_nspname:
+        usage: "LABEL"
+        description: "Schema synchronization is related to"
+    - sync_relname:
+        usage: "LABEL"
+        description: "Table synchronization is related to"
+    - sync_status:
+        usage: "LABEL"
+        description: "Status of synchronization"
+    - sync_status_lsn:
+        usage: "LABEL"
+        description: "Status LSN of synchronization"
+    - sync_status_lsn_numeric:
+        usage: "COUNTER"
+        description: "Status LSN of synchronization (as number)"

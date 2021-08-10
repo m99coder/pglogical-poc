@@ -31,12 +31,12 @@ services:
 
   pgexporter:
     environment:
-      - DATA_SOURCE_NAME=postgresql://postgres:s3cr3t@pgprovider:5432?sslmode=disable,postgresql://postgres:s3cr3t@pgsubscriber:5432?sslmode=disable
+      - DATA_SOURCE_NAME=postgresql://postgres:s3cr3t@pgprovider:5432/pg_logical_replication?sslmode=disable,postgresql://postgres:s3cr3t@pgsubscriber:5432/pg_logical_replication_results?sslmode=disable
       - PG_EXPORTER_DISABLE_SETTINGS_METRICS=true
       - PG_EXPORTER_EXTEND_QUERY_PATH=/config/queries.yaml
     image: wrouesnel/postgres_exporter
     volumes:
-      - ./queries.yml:/config/queries.yaml
+      - ./pgexporter/queries.yml:/config/queries.yaml
     ports:
       - 9187:9187
     depends_on:
