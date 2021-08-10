@@ -1,25 +1,4 @@
 {
-  "__inputs": [],
-  "__requires": [
-    {
-      "type": "grafana",
-      "id": "grafana",
-      "name": "Grafana",
-      "version": "7.2.0"
-    },
-    {
-      "type": "panel",
-      "id": "graph",
-      "name": "Graph",
-      "version": ""
-    },
-    {
-      "type": "datasource",
-      "id": "prometheus",
-      "name": "Prometheus",
-      "version": "1.0.0"
-    }
-  ],
   "annotations": {
     "list": [
       {
@@ -29,6 +8,12 @@
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
         "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
         "type": "dashboard"
       }
     ]
@@ -37,8 +22,7 @@
   "editable": true,
   "gnetId": 14114,
   "graphTooltip": 0,
-  "id": 1,
-  "iteration": 1603191461722,
+  "iteration": 1628580327981,
   "links": [],
   "panels": [
     {
@@ -49,12 +33,6 @@
       "datasource": "$datasource",
       "editable": true,
       "error": false,
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
       "fill": 1,
       "fillGradient": 0,
       "grid": {},
@@ -86,7 +64,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.2.1",
+      "pluginVersion": "8.1.0",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -410,74 +388,68 @@
     },
     {
       "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": false,
-      "colors": [
-        "rgba(245, 54, 54, 0.9)",
-        "rgba(237, 129, 40, 0.89)",
-        "rgba(50, 172, 45, 0.97)"
-      ],
       "datasource": "$datasource",
-      "decimals": 0,
-      "editable": true,
-      "error": false,
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "color": {
+            "fixedColor": "rgb(31, 120, 193)",
+            "mode": "fixed"
+          },
+          "decimals": 0,
+          "mappings": [
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "N/A"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
         },
         "overrides": []
       },
-      "format": "none",
-      "gauge": {
-        "maxValue": 100,
-        "minValue": 0,
-        "show": false,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
       "gridPos": {
-        "h": 3,
+        "h": 7,
         "w": 4,
         "x": 20,
         "y": 0
       },
-      "height": "55px",
       "id": 11,
       "interval": null,
-      "isNew": true,
       "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
-        },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
       "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": true,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": true
+      "options": {
+        "colorMode": "none",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
       },
-      "tableColumn": "",
+      "pluginVersion": "8.1.0",
       "targets": [
         {
           "dsType": "prometheus",
@@ -532,19 +504,8 @@
           ]
         }
       ],
-      "thresholds": "",
       "title": "QPS",
-      "transparent": true,
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "avg"
+      "type": "stat"
     },
     {
       "aliasColors": {},
@@ -555,12 +516,6 @@
       "decimals": 1,
       "editable": true,
       "error": false,
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
       "fill": 1,
       "fillGradient": 0,
       "grid": {},
@@ -593,7 +548,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.2.1",
+      "pluginVersion": "8.1.0",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -913,12 +868,6 @@
       "datasource": "$datasource",
       "editable": true,
       "error": false,
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
       "fill": 1,
       "fillGradient": 0,
       "grid": {},
@@ -948,7 +897,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.2.1",
+      "pluginVersion": "8.1.0",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1112,12 +1061,6 @@
       "datasource": "$datasource",
       "editable": true,
       "error": false,
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
       "fill": 1,
       "fillGradient": 0,
       "grid": {},
@@ -1147,7 +1090,7 @@
         "alertThreshold": true
       },
       "percentage": true,
-      "pluginVersion": "7.2.1",
+      "pluginVersion": "8.1.0",
       "pointradius": 1,
       "points": false,
       "renderer": "flot",
@@ -1215,12 +1158,6 @@
       "datasource": "$datasource",
       "editable": true,
       "error": false,
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
       "fill": 1,
       "fillGradient": 0,
       "grid": {},
@@ -1250,7 +1187,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.2.1",
+      "pluginVersion": "8.1.0",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1311,8 +1248,8 @@
       }
     }
   ],
-  "refresh": false,
-  "schemaVersion": 26,
+  "refresh": "30s",
+  "schemaVersion": 30,
   "style": "dark",
   "tags": [
     "postgres"
@@ -1322,25 +1259,29 @@
       {
         "allValue": ".*",
         "current": {
-          "selected": false,
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
         "datasource": "$datasource",
         "definition": "",
+        "description": null,
+        "error": null,
         "hide": 0,
         "includeAll": true,
         "label": null,
         "multi": false,
         "name": "instance",
         "options": [],
-        "query": "label_values(up{job=~\"postgres.*\"},instance)",
+        "query": {
+          "query": "label_values(up{job=~\"postgres.*\"},instance)",
+          "refId": "Prometheus-instance-Variable-Query"
+        },
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
         "tagValuesQuery": "",
-        "tags": [],
         "tagsQuery": "",
         "type": "query",
         "useTags": false
@@ -1348,35 +1289,41 @@
       {
         "allValue": ".*",
         "current": {
-          "selected": false,
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
         "datasource": "$datasource",
         "definition": "label_values(pg_stat_database_tup_fetched{instance=~\"$instance\",datname!~\"template.*|postgres\"},datname)",
+        "description": null,
+        "error": null,
         "hide": 0,
         "includeAll": true,
         "label": "db",
         "multi": false,
         "name": "db",
         "options": [],
-        "query": "label_values(pg_stat_database_tup_fetched{instance=~\"$instance\",datname!~\"template.*|postgres\"},datname)",
+        "query": {
+          "query": "label_values(pg_stat_database_tup_fetched{instance=~\"$instance\",datname!~\"template.*|postgres\"},datname)",
+          "refId": "Prometheus-db-Variable-Query"
+        },
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
         "tagValuesQuery": "",
-        "tags": [],
         "tagsQuery": "",
         "type": "query",
         "useTags": false
       },
       {
         "current": {
-          "selected": false,
-          "text": "Postgres Overview",
-          "value": "Postgres Overview"
+          "selected": true,
+          "text": "Prometheus",
+          "value": "Prometheus"
         },
+        "description": null,
+        "error": null,
         "hide": 0,
         "includeAll": false,
         "label": "datasource",
@@ -1384,6 +1331,7 @@
         "name": "datasource",
         "options": [],
         "query": "prometheus",
+        "queryValue": "",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
@@ -1393,30 +1341,28 @@
         "allValue": null,
         "current": {
           "selected": true,
-          "text": "postgres",
-          "value": "postgres"
+          "text": "pgexporter",
+          "value": "pgexporter"
         },
         "datasource": "$datasource",
         "definition": "label_values(pg_up, job)",
+        "description": null,
+        "error": null,
         "hide": 0,
         "includeAll": false,
         "label": "job",
         "multi": false,
         "name": "job",
-        "options": [
-          {
-            "selected": true,
-            "text": "postgres",
-            "value": "postgres"
-          }
-        ],
-        "query": "label_values(pg_up, job)",
-        "refresh": 0,
+        "options": [],
+        "query": {
+          "query": "label_values(pg_up, job)",
+          "refId": "Prometheus-job-Variable-Query"
+        },
+        "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
         "tagValuesQuery": "",
-        "tags": [],
         "tagsQuery": "",
         "type": "query",
         "useTags": false
@@ -1455,5 +1401,5 @@
   "timezone": "browser",
   "title": "PostgreSQL Exporter Quickstart and Dashboard",
   "uid": "wGgaPlciz",
-  "version": 5
+  "version": 1
 }
