@@ -284,8 +284,8 @@ To monitor the overall performance and the replications in particular [PostgreSQ
 
 The following endpoints provide metrics respectively:
 
-* PostgreSQL Server Exporter: [http://localhost:9187/metrics](http://localhost:9187/metrics)
-* Prometheus: [http://localhost:9090/metrics](http://localhost:9090/metrics)
+- PostgreSQL Server Exporter: [http://localhost:9187/metrics](http://localhost:9187/metrics)
+- Prometheus: [http://localhost:9090/metrics](http://localhost:9090/metrics)
 
 After having setup the initial dataset, we can see some values for how many tuples have been inserted (`pg_stat_database_tup_inserted`) in this [graph](http://localhost:9090/graph?g0.expr=pg_stat_database_tup_inserted%7Bdatname%3D%22pg_logical_replication%22%7D&g0.tab=0&g0.stacked=0&g0.show_exemplars=0&g0.range_input=1h) as an example.
 
@@ -293,12 +293,12 @@ The mappings into the Prometheus format provided by _PostgreSQL Server Exporter_
 
 _Prometheus_ will be configured with some example alerts:
 
-* `PostgreSQLMaxConnectionsReached`
-* `PostgreSQLHighConnections`
-* `PostgreSQLDown`
-* `PostgreSQLSlowQueries`
-* `PostgreSQLQPS`
-* `PostgreSQLCacheHitRatio`
+- `PostgreSQLMaxConnectionsReached`
+- `PostgreSQLHighConnections`
+- `PostgreSQLDown`
+- `PostgreSQLSlowQueries`
+- `PostgreSQLQPS`
+- `PostgreSQLCacheHitRatio`
 
 Their definition can be found [here](./prometheus/alerting-rules.yml).
 
