@@ -17,10 +17,10 @@ pglogical_pg_stat_replication:
       application_name,
       EXTRACT(EPOCH FROM backend_start) AS backend_start,
       state,
-      sent_lsn - '0/00000000'::pg_lsn AS sent_lsn_numeric,
-      write_lsn - '0/00000000'::pg_lsn AS write_lsn_numeric,
-      flush_lsn - '0/00000000'::pg_lsn AS flush_lsn_numeric,
-      replay_lsn - '0/00000000'::pg_lsn AS replay_lsn_numeric,
+      sent_lsn - '0/0'::pg_lsn AS sent_lsn_numeric,
+      write_lsn - '0/0'::pg_lsn AS write_lsn_numeric,
+      flush_lsn - '0/0'::pg_lsn AS flush_lsn_numeric,
+      replay_lsn - '0/0'::pg_lsn AS replay_lsn_numeric,
       COALESCE(EXTRACT(EPOCH FROM write_lag), 0) AS write_lag,
       COALESCE(EXTRACT(EPOCH FROM flush_lag), 0) AS flush_lag,
       COALESCE(EXTRACT(EPOCH FROM replay_lag), 0) AS replay_lag
@@ -67,7 +67,7 @@ pglogical_pg_replication_slots:
       pg_replication_slots.database,
       pg_replication_slots.active,
       pg_replication_slots.active_pid AS pid,
-      pg_replication_slots.confirmed_flush_lsn - '0/00000000'::pg_lsn AS confirmed_flush_lsn_numeric,
+      pg_replication_slots.confirmed_flush_lsn - '0/0'::pg_lsn AS confirmed_flush_lsn_numeric,
       pg_stat_replication.application_name
     FROM pg_replication_slots
     INNER JOIN pg_stat_replication ON pg_replication_slots.active_pid = pg_stat_replication.pid
@@ -124,7 +124,7 @@ pglogical_local_sync_status:
         ELSE 'UNKNOWN'
       END AS sync_status,
       sync_statuslsn AS sync_status_lsn,
-      sync_statuslsn - '0/00000000'::pg_lsn AS sync_status_lsn_numeric
+      sync_statuslsn - '0/0'::pg_lsn AS sync_status_lsn_numeric
     FROM pglogical.local_sync_status
     INNER JOIN pglogical.subscription
       ON pglogical.local_sync_status.sync_subid = pglogical.subscription.sub_id

@@ -335,22 +335,12 @@ tps = 493.777011 (excluding connections establishing)
 
 We are aiming to utilize _pgbench_ for our replication example. A good candidate is the `pgbench_history` table, that is holding almost ~2.4k records per teller (after running `pgbench`) and there have been 10 different tellers created. One caveat exist: This table doesn’t have a primary key, so we can only replicate `INSERT` statements. For this example it’s sufficient, though.
 
-```sql
-pg_logical_replication=# SELECT tid, COUNT(tid) FROM pgbench_history GROUP BY tid;
- tid | count
------+-------
-   8 |  2399
-  10 |  2467
-   7 |  2369
-   9 |  2393
-   1 |  2426
-   5 |  2371
-   4 |  2398
-   2 |  2400
-   6 |  2297
-   3 |  2386
-(10 rows)
-```
+_pgbench_ creates the following data:
+
+- `pgbench_accounts`: 100,000 accounts all related to branch `1` with a balance of `0`
+- `pgbench_branches`: 1 branch with a total balance of `0`
+- `pgbench_history`: a kind of ledger that is empty after initialization
+- `pgbench_tellers`: 10 tellers all related to branch `1` with a balance of `0`
 
 After having leveraged `make start init replicate` (or for short `make run`), we can check if the `pgbench_history` table in `pgsubscriber` is filled.
 
@@ -381,7 +371,8 @@ You can use the following `make` targets to simplify processes:
 - `build`: Build containers
 - `start`: Start containers
 - `wait`: Wait for databases to be ready
-- `init`: Wait for databases to be ready
+- `init`: Init databases with `pgbench`
+- `reset`: Reset databases
 - `replicate`: Run replication
 - `run`: Runs `start`, `init` and `replicate`
 - `list`: List running containers

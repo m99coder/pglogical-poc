@@ -28,6 +28,14 @@ init: wait ## Init databases.
 	docker exec -it pglogical-poc_pgsubscriber_1 \
 		pgbench -U postgres -d pg_logical_replication_results -i
 
+reset: wait ## Reset databases.
+	docker exec -it pglogical-poc_pgprovider_1 \
+		psql -U postgres -d pg_logical_replication \
+			-c 'DROP TABLE pgbench_accounts, pgbench_branches, pgbench_history, pgbench_tellers CASCADE;'
+	docker exec -it pglogical-poc_pgsubscriber_1 \
+		psql -U postgres -d pg_logical_replication_results \
+			-c 'DROP TABLE pgbench_accounts, pgbench_branches, pgbench_history, pgbench_tellers CASCADE;'
+
 replicate: wait ## Run replication.
 	docker exec -it pglogical-poc_pgprovider_1 \
 		psql -U postgres -d pg_logical_replication -f /create-replication-set.sql
