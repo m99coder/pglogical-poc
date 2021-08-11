@@ -35,6 +35,10 @@ reset: wait ## Reset databases.
 	docker exec -it pglogical-poc_pgsubscriber_1 \
 		psql -U postgres -d pg_logical_replication_results \
 			-c 'DROP TABLE IF EXISTS pgbench_accounts, pgbench_branches, pgbench_history, pgbench_tellers CASCADE'
+	docker exec -it pglogical-poc_pgsubscriber_1 \
+		psql -U postgres -d pg_logical_replication_results -f /drop-subscription.sql
+	docker exec -it pglogical-poc_pgprovider_1 \
+		psql -U postgres -d pg_logical_replication -f /drop-replication-set.sql
 
 replicate: wait ## Run replication.
 	docker exec -it pglogical-poc_pgprovider_1 \

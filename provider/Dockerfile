@@ -10,3 +10,4 @@ RUN apt-get install -y -V postgresql-${PG_MAJOR}-pglogical=2.2.2-1.stretch+1
 COPY init.sql /docker-entrypoint-initdb.d/init.sql
 COPY replication.sql /replication.sql
 COPY create-replication-set.sql /create-replication-set.sql
+COPY drop-replication-set.sql /drop-replication-set.sql
