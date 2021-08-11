@@ -31,10 +31,10 @@ init: wait ## Init databases.
 reset: wait ## Reset databases.
 	docker exec -it pglogical-poc_pgprovider_1 \
 		psql -U postgres -d pg_logical_replication \
-			-c 'DROP TABLE pgbench_accounts, pgbench_branches, pgbench_history, pgbench_tellers CASCADE;'
+			-c 'DROP TABLE IF EXISTS pgbench_accounts, pgbench_branches, pgbench_history, pgbench_tellers CASCADE'
 	docker exec -it pglogical-poc_pgsubscriber_1 \
 		psql -U postgres -d pg_logical_replication_results \
-			-c 'DROP TABLE pgbench_accounts, pgbench_branches, pgbench_history, pgbench_tellers CASCADE;'
+			-c 'DROP TABLE IF EXISTS pgbench_accounts, pgbench_branches, pgbench_history, pgbench_tellers CASCADE'
 
 replicate: wait ## Run replication.
 	docker exec -it pglogical-poc_pgprovider_1 \
@@ -42,7 +42,12 @@ replicate: wait ## Run replication.
 	docker exec -it pglogical-poc_pgsubscriber_1 \
 		psql -U postgres -d pg_logical_replication_results -f /create-subscription.sql
 	docker exec -it pglogical-poc_pgprovider_1 \
-		pgbench -U postgres -d pg_logical_replication -c 10 -T 60 -r
+		pgbench -U postgres -d pg_logical_replication -c 10 -T 60 -r > pgresult && \
+		echo "\nhead\n" && \
+		head -n 22 pgresult && \
+		echo "\ntail\n" && \
+		tail -n 22 pgresult && \
+		rm pgresult
 	docker exec -it pglogical-poc_pgprovider_1 \
 		psql -U postgres -d pg_logical_replication \
 			-c 'SELECT COUNT(*) FROM pgbench_history WHERE tid = 1;'

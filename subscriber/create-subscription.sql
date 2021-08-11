@@ -10,6 +10,3 @@ SELECT pglogical.create_subscription(
   replication_sets := array['pgbench'],
   provider_dsn := 'host=pgprovider port=5432 dbname=pg_logical_replication user=postgres password=s3cr3t'
 );
-
--- wait for sync complete
-SELECT pglogical.wait_for_subscription_sync_complete('pglogical_pgbench_history');
