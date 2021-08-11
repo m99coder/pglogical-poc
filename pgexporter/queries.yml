@@ -91,6 +91,38 @@ pglogical_pg_replication_slots:
         usage: "LABEL"
         description: "Name of the application that is connected to this WAL sender"
 
+pglogical_queue:
+  query: |
+    SELECT
+      EXTRACT(EPOCH FROM queued_at) AS queued_at,
+      role,
+      replication_sets,
+      CASE
+        WHEN message_type = 'Q' THEN 'QUEUE_COMMAND_TYPE_SQL'
+        WHEN message_type = 'T' THEN 'QUEUE_COMMAND_TYPE_TRUNCATE'
+        WHEN message_type = 'A' THEN 'QUEUE_COMMAND_TYPE_TABLESYNC'
+        WHEN message_type = 'S' THEN 'QUEUE_COMMAND_TYPE_SEQUENCE'
+        ELSE 'UNKNOWN'
+      END as message_type,
+      ROW_NUMBER() OVER(ORDER BY queued_at) AS row_number
+    FROM pglogical.queue
+  metrics:
+    - queued_at:
+        usage: "LABEL"
+        description: "Time at which command was queued"
+    - role:
+        usage: "LABEL"
+        description: "Role used for queued command"
+    - replication_sets:
+        usage: "LABEL"
+        description: "Replication sets used for queued command"
+    - message_type:
+        usage: "LABEL"
+        description: "Type of queued command"
+    - row_number:
+        usage: "COUNTER"
+        description: "Artifically created index number of queued command"
+
 pglogical_local_sync_status:
   query: |
     SELECT
@@ -176,3 +208,33 @@ pglogical_local_sync_status:
     - sync_status_lsn_numeric:
         usage: "COUNTER"
         description: "Status LSN of synchronization (as number)"
+
+pglogical_subscription_status:
+  query: |
+    SELECT
+      subscription_name,
+      status,
+      provider_node,
+      slot_name,
+      replication_sets,
+      ROW_NUMBER() OVER(ORDER BY subscription_name) AS row_number
+    FROM pglogical.show_subscription_status()
+  metrics:
+    - subscription_name:
+        usage: "LABEL"
+        description: "Name of subscription"
+    - status:
+        usage: "LABEL"
+        description: "Status of subscription"
+    - provider_node:
+        usage: "LABEL"
+        description: "Provider node of subscription"
+    - slot_name:
+        usage: "LABEL"
+        description: "Slot name of subscription"
+    - replication_sets:
+        usage: "LABEL"
+        description: "Replication sets of subscription"
+    - row_number:
+        usage: "COUNTER"
+        description: "Artifically created index number of queued command"
