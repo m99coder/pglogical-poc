@@ -28,7 +28,7 @@ For a more realistic setup there are three tables created: `users`, `posts`, and
 
 pglogical currently **doesn’t support sub-queries** in the `row_filter`. So we need an alternative approach.
 
-```
+```text
 invalid row_filter expression "post_id = IN (SELECT id FROM posts WHERE user_id = 1)"
 ```
 
@@ -391,7 +391,7 @@ $ docker run -it --net pglogical-poc_default --rm jbergknoff/postgresql-client \
 
 ## Resources
 
-**Postgres**
+### Postgres
 
 - [PostgreSQL and the logical replication](https://blog.raveland.org/post/postgresql_lr_en/)
 - [PostgreSQL replication with Docker](https://medium.com/swlh/postgresql-replication-with-docker-c6a904becf77)
@@ -404,7 +404,7 @@ $ docker run -it --net pglogical-poc_default --rm jbergknoff/postgresql-client \
 - [PostgreSQL – logical replication with pglogical](https://blog.dbi-services.com/postgresql-logical-replication-with-pglogical/)
 - [PG Phriday: Perfectly Logical](http://bonesmoses.org/2016/10/14/pg-phriday-perfectly-logical/)
 
-**Grafana**
+### Grafana
 
 - [Provisioning Grafana Datasources and Dashboards Automagically](https://blog.56k.cloud/provisioning-grafana-datasources-and-dashboards-automagically/)
 - [PostgreSQL Exporter Quickstart and Dashboard](https://grafana.com/grafana/dashboards/14114)
