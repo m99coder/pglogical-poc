@@ -5,6 +5,7 @@
 - [Manually setting up built-in logical replication](MANUAL.md)
 - [Docker Compose Network checks](NETWORK.md)
 - [pglogical-docs](PGLOGICAL.md)
+- [Simulate different scenarios](SCENARIOS.md)
 
 ## Setup
 
@@ -41,13 +42,13 @@ Now run replication queries:
 #   - pglogical.create_node
 #   - pglogical.create_replication_set
 #   - pglogical.replication_set_add_table
-docker exec -it pglogical-poc_pgprovider_1 \
+docker exec -it pglogical-poc-pgprovider-1 \
   psql -U postgres -d pg_logical_replication -f /replication.sql
 
 # second for the subscriber:
 #   - pglogical.create_node
 #   - pglogical.create_subscription
-docker exec -it pglogical-poc_pgsubscriber_1 \
+docker exec -it pglogical-poc-pgsubscriber-1 \
   psql -U postgres -d pg_logical_replication_results -f /replication.sql
 ```
 
@@ -55,7 +56,7 @@ And finally, check if the correct number of posts was replicated based on the ar
 
 ```bash
 # get number of posts having `user_id = 1`
-docker exec -it pglogical-poc_pgprovider_1 \
+docker exec -it pglogical-poc-pgprovider-1 \
   psql -U postgres -d pg_logical_replication \
     -c 'SELECT COUNT(*) FROM posts WHERE user_id = 1;'
  count
@@ -64,7 +65,7 @@ docker exec -it pglogical-poc_pgprovider_1 \
 (1 row)
 
 # get number of replicated posts
-docker exec -it pglogical-poc_pgsubscriber_1 \
+docker exec -it pglogical-poc-pgsubscriber-1 \
   psql -U postgres -d pg_logical_replication_results \
     -c 'SELECT COUNT(*) FROM posts;'
  count
@@ -78,17 +79,17 @@ _The actual number of posts can differ between runs, as the initial data is gene
 Try to add more posts and comments to the provider instance and check if the replication worked.
 
 ```bash
-docker exec -it pglogical-poc_pgprovider_1 \
+docker exec -it pglogical-poc-pgprovider-1 \
   psql -U postgres -d pg_logical_replication \
     -c 'INSERT INTO posts (SELECT generate_series(1001, 2000), FLOOR(random()*50)+1);'
 INSERT 0 1000
 
-docker exec -it pglogical-poc_pgprovider_1 \
+docker exec -it pglogical-poc-pgprovider-1 \
   psql -U postgres -d pg_logical_replication \
     -c 'INSERT INTO comments (SELECT generate_series(201, 400), FLOOR(random()*1000)+1, 1, (ROUND(random())::int)::boolean);'
 INSERT 0 200
 
-docker exec -it pglogical-poc_pgprovider_1 \
+docker exec -it pglogical-poc-pgprovider-1 \
   psql -U postgres -d pg_logical_replication \
     -c 'UPDATE comments
 SET user_id = subquery.user_id
@@ -143,7 +144,7 @@ Determine replication status
 
 ```bash
 # check replication slots on provider
-docker exec -it pglogical-poc_pgprovider_1 \
+docker exec -it pglogical-poc-pgprovider-1 \
   psql -U postgres -d pg_logical_replication
 psql (11.5 (Debian 11.5-3.pgdg90+1))
 Type "help" for help.
@@ -172,7 +173,7 @@ Find column descriptions [here](https://www.postgresql.org/docs/11/view-pg-repli
 
 ```bash
 # check current WAL insert LSN
-docker exec -it pglogical-poc_pgprovider_1 \
+docker exec -it pglogical-poc-pgprovider-1 \
   psql -U postgres -d pg_logical_replication
 psql (11.5 (Debian 11.5-3.pgdg90+1))
 Type "help" for help.
@@ -188,7 +189,7 @@ pg_logical_replication=# exit
 
 ```bash
 # check replication status on provider
-docker exec -it pglogical-poc_pgprovider_1 \
+docker exec -it pglogical-poc-pgprovider-1 \
   psql -U postgres -d pg_logical_replication
 psql (11.5 (Debian 11.5-3.pgdg90+1))
 Type "help" for help.
@@ -238,7 +239,7 @@ Find column descriptions [here](https://www.postgresql.org/docs/11/monitoring-st
 
 ```bash
 # check local sync status on subscriber
-docker exec -it pglogical-poc_pgsubscriber_1 \
+docker exec -it pglogical-poc-pgsubscriber-1 \
   psql -U postgres -d pg_logical_replication_results
 psql (11.10 (Debian 11.10-1.pgdg90+1))
 Type "help" for help.
@@ -312,11 +313,11 @@ In conjunction with _Prometheus_, _Grafana_ can be used to monitor a whole bunch
 
 ```bash
 $ # init pgbench by creating the necessary tables
-$ docker exec -it pglogical-poc_pgprovider_1 \
+$ docker exec -it pglogical-poc-pgprovider-1 \
     pgbench -U postgres -d pg_logical_replication -i
 
 $ # run pgbench
-$ docker exec -it pglogical-poc_pgprovider_1 \
+$ docker exec -it pglogical-poc-pgprovider-1 \
     pgbench -U postgres -d pg_logical_replication -c 10 -T 300
 # ...
 transaction type: <builtin: TPC-B (sort of)>
@@ -346,7 +347,7 @@ After having leveraged `make start init replicate` (or for short `make run`), we
 
 ```bash
 # count on provider side
-docker exec -it pglogical-poc_pgprovider_1 \
+docker exec -it pglogical-poc-pgprovider-1 \
   psql -U postgres -d pg_logical_replication \
     -c 'SELECT COUNT(*) FROM pgbench_history WHERE tid = 1;'
  count
@@ -355,7 +356,7 @@ docker exec -it pglogical-poc_pgprovider_1 \
 (1 row)
 
 # count on subscriber side
-docker exec -it pglogical-poc_pgsubscriber_1 \
+docker exec -it pglogical-poc-pgsubscriber-1 \
   psql -U postgres -d pg_logical_replication_results \
     -c 'SELECT COUNT(*) FROM pgbench_history WHERE tid = 1;'
  count
