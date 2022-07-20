@@ -83,3 +83,39 @@ docker exec -it pglogical-poc-pgsubscriber-1 \
   psql -U postgres -d pg_logical_replication_results \
     -c 'SELECT * FROM comments;'
 ```
+
+Solution: We use a volatile function to provide the default value.
+
+```bash
+# stop containers and clean up
+docker-compose down --rmi all
+
+# start containers with rebuilding images
+docker-compose up -d --build
+
+# run migrations
+docker exec -it pglogical-poc-pgprovider-1 \
+  psql -U postgres -d pg_logical_replication -f /migration-2.sql
+
+docker exec -it pglogical-poc-pgsubscriber-1 \
+  psql -U postgres -d pg_logical_replication_results -f /migration-2.sql
+
+# configure and start replication
+docker exec -it pglogical-poc-pgprovider-1 \
+  psql -U postgres -d pg_logical_replication -f /replication.sql
+
+docker exec -it pglogical-poc-pgsubscriber-1 \
+  psql -U postgres -d pg_logical_replication_results -f /replication.sql
+
+# check logs
+docker logs pglogical-poc-pgsubscriber-1
+
+# check entries
+docker exec -it pglogical-poc-pgprovider-1 \
+  psql -U postgres -d pg_logical_replication \
+    -c 'SELECT * FROM comments WHERE user_id = 1;'
+
+docker exec -it pglogical-poc-pgsubscriber-1 \
+  psql -U postgres -d pg_logical_replication_results \
+    -c 'SELECT * FROM comments;'
+```
