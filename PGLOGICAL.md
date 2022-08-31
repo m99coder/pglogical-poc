@@ -24,11 +24,11 @@ Architectural details:
 - One subscriber can merge changes from several origins and detect conflict between changes with automatic and configurable conflict resolution
 - Cascading replication is implemented in the form of changeset forwarding
 
-### Requirements
+## Requirements
 
 To use pglogical the provider and subscriber must be running PostgreSQL 9.4 or newer. The `pglogical` extension must be installed on both provider and subscriber. You must `CREATE EXTENSION pglogical` on both. Tables on the provider and subscriber must have the same names and be in the same schema. Tables on the provider and subscriber must have the same columns, with the same data types in each column. `CHECK` constraints, `NOT NULL` constraints, etc. must be the same or weaker (more permissive) on the subscriber than the provider. Tables must have the same `PRIMARY KEY`s. It is not recommended to add additional `UNIQUE` constraints other than the `PRIMARY KEY`.
 
-### Usage
+## Usage
 
 First the PostgreSQL server has to be properly configured to support logical decoding:
 
@@ -87,7 +87,7 @@ SELECT pglogical.create_subscription(
 );
 ```
 
-#### SQL Interfaces
+### SQL Interfaces
 
 ```sql
 /**
@@ -429,7 +429,7 @@ pglogical.replication_set_remove_sequence(set_name name, relation regclass)
 
 You can view the information about which table is in which set by querying the `pglogical.tables` view.
 
-#### Row Filtering on Provider
+### Row Filtering on Provider
 
 On the provider the row filtering can be done by specifying `row_filter` parameter for the `pglogical.replication_set_add_table` function. The `row_filter` is a normal PostgreSQL expression which has the same limitations on what’s allowed as the `CHECK` constraint.
 
@@ -437,11 +437,11 @@ Simple `row_filter` would look something like `row_filter := 'id > 0'` which wou
 
 It’s also worth noting that the `row_filter` is running inside the replication session so session specific expressions such as `CURRENT_USER` will have values of the replication session and not the session which did the writes.
 
-#### Row Filtering on Subscriber
+### Row Filtering on Subscriber
 
 On the subscriber the row based filtering can be implemented using standard `BEFORE TRIGGER` mechanism. It is required to mark any such triggers as either `ENABLE REPLICA` or `ENABLE ALWAYS` otherwise they will not be executed by the replication process.
 
-### Conflicts
+## Conflicts
 
 In case the node is subscribed to multiple providers, or when local writes happen on a subscriber, conflicts can arise for the incoming changes. These are automatically detected and can be acted on depending on the configuration.
 
