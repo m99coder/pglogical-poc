@@ -14,3 +14,4 @@ COPY backfill.sql /backfill.sql
 COPY replication.sql /replication.sql
 COPY create-replication-set.sql /create-replication-set.sql
 COPY drop-replication-set.sql /drop-replication-set.sql
+COPY pgbench.sql /pgbench.sql

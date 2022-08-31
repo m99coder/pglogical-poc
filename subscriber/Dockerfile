@@ -13,3 +13,4 @@ COPY migration-2.sql /migration-2.sql
 COPY replication.sql /replication.sql
 COPY create-subscription.sql /create-subscription.sql
 COPY drop-subscription.sql /drop-subscription.sql
+COPY pgbench.sql /pgbench.sql

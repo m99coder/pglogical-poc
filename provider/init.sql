@@ -15,9 +15,9 @@ CREATE TABLE comments (
 
 -- create data
 INSERT INTO users (SELECT generate_series(1, 50));
-INSERT INTO posts (SELECT generate_series(1, 1000), FLOOR(random()*50)+1);
+INSERT INTO posts (SELECT generate_series(1, 1000), FLOOR(random() * 50) + 1);
 INSERT INTO comments
-  (SELECT generate_series(1, 200), FLOOR(random()*1000)+1, 1, (ROUND(random())::int)::boolean);
+  (SELECT generate_series(1, 200), FLOOR(random() * 1000) + 1, 1, (ROUND(random())::int)::boolean);
 
 -- denormalize foreign key
 UPDATE comments

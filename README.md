@@ -11,7 +11,7 @@
 
 In this PoC we logically replicate from a PostgreSQL 11.5 to a PostgreSQL 11.10. Both instances running in Docker containers and communicating with each other. Both have pglogical 2.2.2 installed.
 
-```bash
+```shell
 # start containers
 docker-compose up -d
 
@@ -37,26 +37,26 @@ For simplicity we choose de-normalizing the foreign key relation from `comments`
 
 Now run replication queries:
 
-```bash
+```shell
 # first for the provider:
 #   - pglogical.create_node
 #   - pglogical.create_replication_set
 #   - pglogical.replication_set_add_table
-docker exec -it pglogical-poc-pgprovider-1 \
+docker exec -it pglogical-poc_pgprovider_1 \
   psql -U postgres -d pg_logical_replication -f /replication.sql
 
 # second for the subscriber:
 #   - pglogical.create_node
 #   - pglogical.create_subscription
-docker exec -it pglogical-poc-pgsubscriber-1 \
+docker exec -it pglogical-poc_pgsubscriber_1 \
   psql -U postgres -d pg_logical_replication_results -f /replication.sql
 ```
 
 And finally, check if the correct number of posts was replicated based on the arbitrary row filter `user_id = 1`:
 
-```bash
+```shell
 # get number of posts having `user_id = 1`
-docker exec -it pglogical-poc-pgprovider-1 \
+docker exec -it pglogical-poc_pgprovider_1 \
   psql -U postgres -d pg_logical_replication \
     -c 'SELECT COUNT(*) FROM posts WHERE user_id = 1;'
  count
@@ -65,7 +65,7 @@ docker exec -it pglogical-poc-pgprovider-1 \
 (1 row)
 
 # get number of replicated posts
-docker exec -it pglogical-poc-pgsubscriber-1 \
+docker exec -it pglogical-poc_pgsubscriber_1 \
   psql -U postgres -d pg_logical_replication_results \
     -c 'SELECT COUNT(*) FROM posts;'
  count
@@ -78,18 +78,18 @@ _The actual number of posts can differ between runs, as the initial data is gene
 
 Try to add more posts and comments to the provider instance and check if the replication worked.
 
-```bash
-docker exec -it pglogical-poc-pgprovider-1 \
+```shell
+docker exec -it pglogical-poc_pgprovider_1 \
   psql -U postgres -d pg_logical_replication \
-    -c 'INSERT INTO posts (SELECT generate_series(1001, 2000), FLOOR(random()*50)+1);'
+    -c 'INSERT INTO posts (SELECT generate_series(1001, 2000), FLOOR(random() * 50) + 1);'
 INSERT 0 1000
 
-docker exec -it pglogical-poc-pgprovider-1 \
+docker exec -it pglogical-poc_pgprovider_1 \
   psql -U postgres -d pg_logical_replication \
-    -c 'INSERT INTO comments (SELECT generate_series(201, 400), FLOOR(random()*1000)+1, 1, (ROUND(random())::int)::boolean);'
+    -c 'INSERT INTO comments (SELECT generate_series(201, 400), FLOOR(random()* 1000) + 1, 1, (ROUND(random())::int)::boolean);'
 INSERT 0 200
 
-docker exec -it pglogical-poc-pgprovider-1 \
+docker exec -it pglogical-poc_pgprovider_1 \
   psql -U postgres -d pg_logical_replication \
     -c 'UPDATE comments
 SET user_id = subquery.user_id
@@ -142,9 +142,9 @@ The sync states are defined [here](https://github.com/2ndQuadrant/pglogical/blob
 
 Determine replication status
 
-```bash
+```shell
 # check replication slots on provider
-docker exec -it pglogical-poc-pgprovider-1 \
+docker exec -it pglogical-poc_pgprovider_1 \
   psql -U postgres -d pg_logical_replication
 psql (11.5 (Debian 11.5-3.pgdg90+1))
 Type "help" for help.
@@ -171,9 +171,9 @@ pg_logical_replication=# exit
 
 Find column descriptions [here](https://www.postgresql.org/docs/11/view-pg-replication-slots.html).
 
-```bash
+```shell
 # check current WAL insert LSN
-docker exec -it pglogical-poc-pgprovider-1 \
+docker exec -it pglogical-poc_pgprovider_1 \
   psql -U postgres -d pg_logical_replication
 psql (11.5 (Debian 11.5-3.pgdg90+1))
 Type "help" for help.
@@ -187,9 +187,9 @@ pg_current_wal_insert_lsn | 0/18264A8
 pg_logical_replication=# exit
 ```
 
-```bash
+```shell
 # check replication status on provider
-docker exec -it pglogical-poc-pgprovider-1 \
+docker exec -it pglogical-poc_pgprovider_1 \
   psql -U postgres -d pg_logical_replication
 psql (11.5 (Debian 11.5-3.pgdg90+1))
 Type "help" for help.
@@ -237,9 +237,9 @@ pg_logical_replication=# exit
 
 Find column descriptions [here](https://www.postgresql.org/docs/11/monitoring-stats.html#PG-STAT-REPLICATION-VIEW).
 
-```bash
+```shell
 # check local sync status on subscriber
-docker exec -it pglogical-poc-pgsubscriber-1 \
+docker exec -it pglogical-poc_pgsubscriber_1 \
   psql -U postgres -d pg_logical_replication_results
 psql (11.10 (Debian 11.10-1.pgdg90+1))
 Type "help" for help.
@@ -311,13 +311,13 @@ In conjunction with _Prometheus_, _Grafana_ can be used to monitor a whole bunch
 
 [pgbench](https://www.postgresql.org/docs/11/pgbench.html) can be used to perform a benchmark. This is a 2-step process. First you need to initialize the database and then you can run the benchmark itself.
 
-```bash
+```shell
 $ # init pgbench by creating the necessary tables
-$ docker exec -it pglogical-poc-pgprovider-1 \
+$ docker exec -it pglogical-poc_pgprovider_1 \
     pgbench -U postgres -d pg_logical_replication -i
 
 $ # run pgbench
-$ docker exec -it pglogical-poc-pgprovider-1 \
+$ docker exec -it pglogical-poc_pgprovider_1 \
     pgbench -U postgres -d pg_logical_replication -c 10 -T 300
 # ...
 transaction type: <builtin: TPC-B (sort of)>
@@ -345,9 +345,9 @@ _pgbench_ creates the following data:
 
 After having leveraged `make start init replicate` (or for short `make run`), we can check if the `pgbench_history` table in `pgsubscriber` is filled.
 
-```bash
+```shell
 # count on provider side
-docker exec -it pglogical-poc-pgprovider-1 \
+docker exec -it pglogical-poc_pgprovider_1 \
   psql -U postgres -d pg_logical_replication \
     -c 'SELECT COUNT(*) FROM pgbench_history WHERE tid = 1;'
  count
@@ -356,7 +356,7 @@ docker exec -it pglogical-poc-pgprovider-1 \
 (1 row)
 
 # count on subscriber side
-docker exec -it pglogical-poc-pgsubscriber-1 \
+docker exec -it pglogical-poc_pgsubscriber_1 \
   psql -U postgres -d pg_logical_replication_results \
     -c 'SELECT COUNT(*) FROM pgbench_history WHERE tid = 1;'
  count
@@ -384,7 +384,7 @@ You can use the following `make` targets to simplify processes:
 
 For debugging purposes we can run a [Docker image](https://hub.docker.com/r/jbergknoff/postgresql-client) that only provides the `psql` client as follows:
 
-```bash
+```shell
 $ # run `psql` within the same docker network and access `pgprovider`
 $ docker run -it --net pglogical-poc_default --rm jbergknoff/postgresql-client \
     "postgresql://postgres:s3cr3t@pgprovider:5432?sslmode=disable"
