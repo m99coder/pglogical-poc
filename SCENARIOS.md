@@ -9,32 +9,32 @@ We run a migration that adds a column with a default value. When we try to repli
 docker-compose up -d
 
 # run migrations
-docker exec -it pglogical-poc_pgprovider_1 \
+docker exec -it pglogical-poc-pgprovider-1 \
   psql -U postgres -d pg_logical_replication -f /migration.sql
 
-docker exec -it pglogical-poc_pgsubscriber_1 \
+docker exec -it pglogical-poc-pgsubscriber-1 \
   psql -U postgres -d pg_logical_replication_results -f /migration.sql
 
 # check schema
-docker exec -it pglogical-poc_pgprovider_1 \
+docker exec -it pglogical-poc-pgprovider-1 \
   psql -U postgres -d pg_logical_replication \
     -c '\d+ comments'
-docker exec -it pglogical-poc_pgprovider_1 \
+docker exec -it pglogical-poc-pgprovider-1 \
   psql -U postgres -d pg_logical_replication \
     -c 'SELECT * FROM comments LIMIT 1;'
 
-docker exec -it pglogical-poc_pgsubscriber_1 \
+docker exec -it pglogical-poc-pgsubscriber-1 \
   psql -U postgres -d pg_logical_replication_results -c '\d+ comments'
 
 # configure and start replication
-docker exec -it pglogical-poc_pgprovider_1 \
+docker exec -it pglogical-poc-pgprovider-1 \
   psql -U postgres -d pg_logical_replication -f /replication.sql
 
-docker exec -it pglogical-poc_pgsubscriber_1 \
+docker exec -it pglogical-poc-pgsubscriber-1 \
   psql -U postgres -d pg_logical_replication_results -f /replication.sql
 
 # check logs
-docker logs pglogical-poc_pgsubscriber_1
+docker logs pglogical-poc-pgsubscriber-1
 ```
 
 ```text
@@ -54,32 +54,32 @@ docker-compose down --rmi all
 docker-compose up -d --build
 
 # run migrations
-docker exec -it pglogical-poc_pgprovider_1 \
+docker exec -it pglogical-poc-pgprovider-1 \
   psql -U postgres -d pg_logical_replication -f /migration.sql
 
-docker exec -it pglogical-poc_pgsubscriber_1 \
+docker exec -it pglogical-poc-pgsubscriber-1 \
   psql -U postgres -d pg_logical_replication_results -f /migration.sql
 
 # run backfill
-docker exec -it pglogical-poc_pgprovider_1 \
+docker exec -it pglogical-poc-pgprovider-1 \
   psql -U postgres -d pg_logical_replication -f /backfill.sql
 
 # configure and start replication
-docker exec -it pglogical-poc_pgprovider_1 \
+docker exec -it pglogical-poc-pgprovider-1 \
   psql -U postgres -d pg_logical_replication -f /replication.sql
 
-docker exec -it pglogical-poc_pgsubscriber_1 \
+docker exec -it pglogical-poc-pgsubscriber-1 \
   psql -U postgres -d pg_logical_replication_results -f /replication.sql
 
 # check logs
-docker logs pglogical-poc_pgsubscriber_1
+docker logs pglogical-poc-pgsubscriber-1
 
 # check entries
-docker exec -it pglogical-poc_pgprovider_1 \
+docker exec -it pglogical-poc-pgprovider-1 \
   psql -U postgres -d pg_logical_replication \
     -c 'SELECT * FROM comments WHERE user_id = 1;'
 
-docker exec -it pglogical-poc_pgsubscriber_1 \
+docker exec -it pglogical-poc-pgsubscriber-1 \
   psql -U postgres -d pg_logical_replication_results \
     -c 'SELECT * FROM comments;'
 ```
@@ -94,28 +94,28 @@ docker-compose down --rmi all
 docker-compose up -d --build
 
 # run migrations
-docker exec -it pglogical-poc_pgprovider_1 \
+docker exec -it pglogical-poc-pgprovider-1 \
   psql -U postgres -d pg_logical_replication -f /migration-2.sql
 
-docker exec -it pglogical-poc_pgsubscriber_1 \
+docker exec -it pglogical-poc-pgsubscriber-1 \
   psql -U postgres -d pg_logical_replication_results -f /migration-2.sql
 
 # configure and start replication
-docker exec -it pglogical-poc_pgprovider_1 \
+docker exec -it pglogical-poc-pgprovider-1 \
   psql -U postgres -d pg_logical_replication -f /replication.sql
 
-docker exec -it pglogical-poc_pgsubscriber_1 \
+docker exec -it pglogical-poc-pgsubscriber-1 \
   psql -U postgres -d pg_logical_replication_results -f /replication.sql
 
 # check logs
-docker logs pglogical-poc_pgsubscriber_1
+docker logs pglogical-poc-pgsubscriber-1
 
 # check entries
-docker exec -it pglogical-poc_pgprovider_1 \
+docker exec -it pglogical-poc-pgprovider-1 \
   psql -U postgres -d pg_logical_replication \
     -c 'SELECT * FROM comments WHERE user_id = 1;'
 
-docker exec -it pglogical-poc_pgsubscriber_1 \
+docker exec -it pglogical-poc-pgsubscriber-1 \
   psql -U postgres -d pg_logical_replication_results \
     -c 'SELECT * FROM comments;'
 ```
@@ -134,21 +134,21 @@ docker compose up -d
 #   - pglogical.create_node
 #   - pglogical.create_replication_set
 #   - pglogical.replication_set_add_table
-docker exec -it pglogical-poc_pgprovider_1 \
+docker exec -it pglogical-poc-pgprovider-1 \
   psql -U postgres -d pg_logical_replication -f /replication.sql
 
 # second for the subscriber:
 #   - pglogical.create_node
 #   - pglogical.create_subscription
-docker exec -it pglogical-poc_pgsubscriber_1 \
+docker exec -it pglogical-poc-pgsubscriber-1 \
   psql -U postgres -d pg_logical_replication_results -f /replication.sql
 
 # initialize pgbench tables
-# docker exec -it pglogical-poc_pgprovider_1 \
+# docker exec -it pglogical-poc-pgprovider-1 \
 #   pgbench -i -U postgres -d pg_logical_replication
 
 # check tables
-# docker exec -it pglogical-poc_pgprovider_1 \
+# docker exec -it pglogical-poc-pgprovider-1 \
 #   psql -U postgres -d pg_logical_replication \
 #     -c 'SELECT
 #           (SELECT COUNT(1) FROM pgbench_accounts) AS accounts,
@@ -157,7 +157,7 @@ docker exec -it pglogical-poc_pgsubscriber_1 \
 #           (SELECT COUNT(1) FROM pgbench_tellers) AS tellers;'
 
 # run pgbench with 10 threads and 10.000 transactions
-docker exec -it pglogical-poc_pgprovider_1 \
+docker exec -it pglogical-poc-pgprovider-1 \
   pgbench -U postgres -d pg_logical_replication \
     -c 10 -j 2 -t 10000 -f pgbench.sql
 ```
