@@ -19,43 +19,43 @@ start: ## Start containers.
 	docker-compose up -d
 
 wait: ## Wait for databases to be ready.
-	timeout 90s bash -c "until docker exec pglogical-poc_pgprovider_1 pg_isready ; do sleep 5 ; done"
-	timeout 90s bash -c "until docker exec pglogical-poc_pgsubscriber_1 pg_isready ; do sleep 5 ; done"
+	timeout 90s bash -c "until docker exec pglogical-poc-pgprovider-1 pg_isready ; do sleep 5 ; done"
+	timeout 90s bash -c "until docker exec pglogical-poc-pgsubscriber-1 pg_isready ; do sleep 5 ; done"
 
 init: wait ## Init databases.
-	docker exec -it pglogical-poc_pgprovider_1 \
+	docker exec -it pglogical-poc-pgprovider-1 \
 		pgbench -U postgres -d pg_logical_replication -i
-	docker exec -it pglogical-poc_pgsubscriber_1 \
+	docker exec -it pglogical-poc-pgsubscriber-1 \
 		pgbench -U postgres -d pg_logical_replication_results -i
 
 reset: wait ## Reset databases.
-	docker exec -it pglogical-poc_pgprovider_1 \
+	docker exec -it pglogical-poc-pgprovider-1 \
 		psql -U postgres -d pg_logical_replication \
 			-c 'DROP TABLE IF EXISTS pgbench_accounts, pgbench_branches, pgbench_history, pgbench_tellers CASCADE'
-	docker exec -it pglogical-poc_pgsubscriber_1 \
+	docker exec -it pglogical-poc-pgsubscriber-1 \
 		psql -U postgres -d pg_logical_replication_results \
 			-c 'DROP TABLE IF EXISTS pgbench_accounts, pgbench_branches, pgbench_history, pgbench_tellers CASCADE'
-	docker exec -it pglogical-poc_pgsubscriber_1 \
+	docker exec -it pglogical-poc-pgsubscriber-1 \
 		psql -U postgres -d pg_logical_replication_results -f /drop-subscription.sql
-	docker exec -it pglogical-poc_pgprovider_1 \
+	docker exec -it pglogical-poc-pgprovider-1 \
 		psql -U postgres -d pg_logical_replication -f /drop-replication-set.sql
 
 replicate: wait ## Run replication.
-	docker exec -it pglogical-poc_pgprovider_1 \
+	docker exec -it pglogical-poc-pgprovider-1 \
 		psql -U postgres -d pg_logical_replication -f /create-replication-set.sql
-	docker exec -it pglogical-poc_pgsubscriber_1 \
+	docker exec -it pglogical-poc-pgsubscriber-1 \
 		psql -U postgres -d pg_logical_replication_results -f /create-subscription.sql
-	docker exec -it pglogical-poc_pgprovider_1 \
+	docker exec -it pglogical-poc-pgprovider-1 \
 		pgbench -U postgres -d pg_logical_replication -c 10 -T 60 -r > pgresult && \
 		echo "\nhead\n" && \
 		head -n 22 pgresult && \
 		echo "\ntail\n" && \
 		tail -n 22 pgresult && \
 		rm pgresult
-	docker exec -it pglogical-poc_pgprovider_1 \
+	docker exec -it pglogical-poc-pgprovider-1 \
 		psql -U postgres -d pg_logical_replication \
 			-c 'SELECT COUNT(*) FROM pgbench_history WHERE tid = 1;'
-	docker exec -it pglogical-poc_pgsubscriber_1 \
+	docker exec -it pglogical-poc-pgsubscriber-1 \
 		psql -U postgres -d pg_logical_replication_results \
 			-c 'SELECT COUNT(*) FROM pgbench_history WHERE tid = 1;'
 

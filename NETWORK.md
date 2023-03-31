@@ -31,14 +31,14 @@ docker network inspect -v pglogical-poc_default
         "ConfigOnly": false,
         "Containers": {
             "80ae5b2beb40ada3120ba98e3dc76d15cadb9f0fa0187c015b4ae60d2e3e791a": {
-                "Name": "pglogical-poc_pgsubscriber_1",
+                "Name": "pglogical-poc-pgsubscriber-1",
                 "EndpointID": "592114feb099a1d10d2cc5d7731506c0aa4b02e039431646b3ed3f050e5bf802",
                 "MacAddress": "02:42:c0:a8:90:03",
                 "IPv4Address": "192.168.144.3/20",
                 "IPv6Address": ""
             },
             "b59e6fbe72657a6d32fc6f9ea33c58c718c259999683bd0c2d77a5781e81c949": {
-                "Name": "pglogical-poc_pgprovider_1",
+                "Name": "pglogical-poc-pgprovider-1",
                 "EndpointID": "42d00c26782cacf672113d320ffc61b4e237e65adfa48b5f590a74df16a5b62d",
                 "MacAddress": "02:42:c0:a8:90:02",
                 "IPv4Address": "192.168.144.2/20",
@@ -59,11 +59,11 @@ docker network inspect -v pglogical-poc_default
 # get running processes
 docker ps --format 'table {{.ID}}\t{{.Names}}'
 CONTAINER ID   NAMES
-80ae5b2beb40   pglogical-poc_pgsubscriber_1
-b59e6fbe7265   pglogical-poc_pgprovider_1
+80ae5b2beb40   pglogical-poc-pgsubscriber-1
+b59e6fbe7265   pglogical-poc-pgprovider-1
 
 # get hosts from pgprovider
-docker exec pglogical-poc_pgprovider_1 cat /etc/hosts
+docker exec pglogical-poc-pgprovider-1 cat /etc/hosts
 127.0.0.1	localhost
 ::1	localhost ip6-localhost ip6-loopback
 fe00::0	ip6-localnet
@@ -73,7 +73,7 @@ ff02::2	ip6-allrouters
 192.168.144.2	b59e6fbe7265
 
 # get hosts from pgsubscriber
-docker exec pglogical-poc_pgsubscriber_1 cat /etc/hosts
+docker exec pglogical-poc-pgsubscriber-1 cat /etc/hosts
 127.0.0.1	localhost
 ::1	localhost ip6-localhost ip6-loopback
 fe00::0	ip6-localnet
@@ -85,7 +85,7 @@ ff02::2	ip6-allrouters
 
 ```bash
 # connect to other psql instance using host
-docker exec -it pglogical-poc_pgprovider_1 /bin/bash
+docker exec -it pglogical-poc-pgprovider-1 /bin/bash
 root@b59e6fbe7265:/# psql -h pgsubscriber -U replicate pg_logical_replication_results
 psql (11.5 (Debian 11.5-3.pgdg90+1), server 11.10 (Debian 11.10-1.pgdg90+1))
 Type "help" for help.
