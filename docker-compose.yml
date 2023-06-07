@@ -7,6 +7,7 @@ services:
     volumes:
       - ./postgresql.conf:/etc/postgresql.conf
       - ./pg_hba.conf:/etc/pg_hba.conf
+    command: postgres -c config_file=/etc/postgresql.conf -c hba_file=/etc/pg_hba.conf
     ports:
       - 5432:5432
 
@@ -19,6 +20,7 @@ services:
     volumes:
       - ./postgresql.conf:/etc/postgresql.conf
       - ./pg_hba.conf:/etc/pg_hba.conf
+    command: postgres -c config_file=/etc/postgresql.conf -c hba_file=/etc/pg_hba.conf
     ports:
       - 5433:5432
 
