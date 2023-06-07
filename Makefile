@@ -19,8 +19,8 @@ start: ## Start containers.
 	docker-compose up -d
 
 wait: ## Wait for databases to be ready.
-	timeout 90s bash -c "until docker exec pglogical-poc-pgprovider-1 pg_isready ; do sleep 5 ; done"
-	timeout 90s bash -c "until docker exec pglogical-poc-pgsubscriber-1 pg_isready ; do sleep 5 ; done"
+	timeout 90s bash -c "until docker exec pglogical-poc-pgprovider-1 pg_isready -U postgres ; do sleep 5 ; done"
+	timeout 90s bash -c "until docker exec pglogical-poc-pgsubscriber-1 pg_isready -U postgres ; do sleep 5 ; done"
 
 init: wait ## Init databases.
 	docker exec -it pglogical-poc-pgprovider-1 \

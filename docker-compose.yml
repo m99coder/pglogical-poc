@@ -5,8 +5,8 @@ services:
     environment:
       - POSTGRES_PASSWORD=s3cr3t
     volumes:
-      - ./postgresql.conf:/usr/share/postgresql/11/postgresql.conf.sample
-      - ./pg_hba.conf:/usr/share/postgresql/11/pg_hba.conf.sample
+      - ./postgresql.conf:/etc/postgresql.conf
+      - ./pg_hba.conf:/etc/pg_hba.conf
     ports:
       - 5432:5432
 
@@ -17,8 +17,8 @@ services:
     environment:
       - POSTGRES_PASSWORD=s3cr3t
     volumes:
-      - ./postgresql.conf:/usr/share/postgresql/11/postgresql.conf.sample
-      - ./pg_hba.conf:/usr/share/postgresql/11/pg_hba.conf.sample
+      - ./postgresql.conf:/etc/postgresql.conf
+      - ./pg_hba.conf:/etc/pg_hba.conf
     ports:
       - 5433:5432
 
